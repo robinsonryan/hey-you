@@ -63,6 +63,20 @@ class PartyDeleted
 }
 ```
 
+**PartyRestored**
+
+Dispatched when a soft-deleted Party is restored.
+
+```php
+use RobinsonRyan\HeyYou\Events\Party\PartyRestored;
+
+class PartyRestored
+{
+    public Party $party;
+    public Model $partyable;
+}
+```
+
 ### Contact Point Events
 
 ```php
@@ -119,6 +133,105 @@ class ContactPointDeleted
 {
     public ContactPoint $contactPoint;
     public Party $party;
+}
+```
+
+**ContactPointRestored**
+
+Dispatched when a soft-deleted contact point is restored.
+
+```php
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointRestored;
+
+class ContactPointRestored
+{
+    public ContactPoint $contactPoint;
+    public Party $party;
+}
+```
+
+**ContactPointVerificationFailed**
+
+Dispatched when contact point verification fails.
+
+```php
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointVerificationFailed;
+
+class ContactPointVerificationFailed
+{
+    public ContactPoint $contactPoint;
+    public string $method;
+    public string $reason;
+}
+```
+
+**ContactPointVerificationExpired**
+
+Dispatched when a contact point's verification expires.
+
+```php
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointVerificationExpired;
+
+class ContactPointVerificationExpired
+{
+    public ContactPoint $contactPoint;
+}
+```
+
+**ContactPointBounced**
+
+Dispatched when a contact point status changes to bounced.
+
+```php
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointBounced;
+
+class ContactPointBounced
+{
+    public ContactPoint $contactPoint;
+    public array $bounceInfo;
+}
+```
+
+**ContactPointMarkedUnreachable**
+
+Dispatched when a contact point status changes to unreachable.
+
+```php
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointMarkedUnreachable;
+
+class ContactPointMarkedUnreachable
+{
+    public ContactPoint $contactPoint;
+    public string $reason;
+}
+```
+
+**ContactPointPurposeAttached**
+
+Dispatched when a purpose is attached to a contact point.
+
+```php
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointPurposeAttached;
+
+class ContactPointPurposeAttached
+{
+    public ContactPoint $contactPoint;
+    public string $purpose;
+    public array $attributes;  // priority, is_preferred, etc.
+}
+```
+
+**ContactPointPurposeDetached**
+
+Dispatched when a purpose is removed from a contact point.
+
+```php
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointPurposeDetached;
+
+class ContactPointPurposeDetached
+{
+    public ContactPoint $contactPoint;
+    public string $purpose;
 }
 ```
 
@@ -187,6 +300,202 @@ class DncRuleRemoved
     public DoNotContact $dncRule;
     public Party $party;
     public string $scope;
+}
+```
+
+### Address Events
+
+```php
+use RobinsonRyan\HeyYou\Events\Address\AddressCreated;
+use RobinsonRyan\HeyYou\Events\Address\AddressUpdated;
+use RobinsonRyan\HeyYou\Events\Address\AddressDeleted;
+use RobinsonRyan\HeyYou\Events\Address\AddressRestored;
+use RobinsonRyan\HeyYou\Events\Address\AddressValidated;
+use RobinsonRyan\HeyYou\Events\Address\AddressValidationFailed;
+```
+
+**AddressCreated**
+
+Dispatched when a new address is created.
+
+```php
+class AddressCreated
+{
+    public Address $address;
+    public Party $party;
+}
+```
+
+**AddressUpdated**
+
+Dispatched when an address is modified.
+
+```php
+class AddressUpdated
+{
+    public Address $address;
+    public Party $party;
+    public array $changedAttributes;
+}
+```
+
+**AddressDeleted**
+
+Dispatched when an address is soft-deleted.
+
+```php
+class AddressDeleted
+{
+    public Address $address;
+    public Party $party;
+}
+```
+
+**AddressRestored**
+
+Dispatched when a soft-deleted address is restored.
+
+```php
+class AddressRestored
+{
+    public Address $address;
+    public Party $party;
+}
+```
+
+**AddressValidated**
+
+Dispatched when an address validation_status changes to verified.
+
+```php
+class AddressValidated
+{
+    public Address $address;
+    public array $validationResult;
+}
+```
+
+**AddressValidationFailed**
+
+Dispatched when an address validation_status changes to invalid.
+
+```php
+class AddressValidationFailed
+{
+    public Address $address;
+    public array $validationResult;
+}
+```
+
+### Relationship Events
+
+```php
+use RobinsonRyan\HeyYou\Events\Relationship\RelationshipCreated;
+use RobinsonRyan\HeyYou\Events\Relationship\RelationshipUpdated;
+use RobinsonRyan\HeyYou\Events\Relationship\RelationshipEnded;
+use RobinsonRyan\HeyYou\Events\Relationship\RelationshipDeleted;
+```
+
+**RelationshipCreated**
+
+Dispatched when a new party relationship is created.
+
+```php
+class RelationshipCreated
+{
+    public PartyRelationship $relationship;
+    public Party $fromParty;
+    public Party $toParty;
+}
+```
+
+**RelationshipUpdated**
+
+Dispatched when a party relationship is modified.
+
+```php
+class RelationshipUpdated
+{
+    public PartyRelationship $relationship;
+    public array $changedAttributes;
+}
+```
+
+**RelationshipEnded**
+
+Dispatched when a relationship's valid_to is set (relationship ends).
+
+```php
+class RelationshipEnded
+{
+    public PartyRelationship $relationship;
+}
+```
+
+**RelationshipDeleted**
+
+Dispatched when a party relationship is deleted.
+
+```php
+class RelationshipDeleted
+{
+    public PartyRelationship $relationship;
+}
+```
+
+### Role Assignment Events
+
+```php
+use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentCreated;
+use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentUpdated;
+use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentExpired;
+use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentDeleted;
+```
+
+**RoleAssignmentCreated**
+
+Dispatched when a new role assignment is created.
+
+```php
+class RoleAssignmentCreated
+{
+    public RoleAssignment $roleAssignment;
+    public Party $party;
+    public Party $scopeParty;
+}
+```
+
+**RoleAssignmentUpdated**
+
+Dispatched when a role assignment is modified.
+
+```php
+class RoleAssignmentUpdated
+{
+    public RoleAssignment $roleAssignment;
+    public array $changedAttributes;
+}
+```
+
+**RoleAssignmentExpired**
+
+Dispatched when a role assignment's valid_to is set (assignment expires).
+
+```php
+class RoleAssignmentExpired
+{
+    public RoleAssignment $roleAssignment;
+}
+```
+
+**RoleAssignmentDeleted**
+
+Dispatched when a role assignment is deleted.
+
+```php
+class RoleAssignmentDeleted
+{
+    public RoleAssignment $roleAssignment;
 }
 ```
 

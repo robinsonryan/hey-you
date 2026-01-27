@@ -210,8 +210,11 @@ RoleAssignment::factory()->accountsPayable()->forParty($person)->scopedTo($compa
 
 ## Events Dispatched
 
-- **Party**: `PartyCreated`, `PartyUpdated`, `PartyDeleted`
-- **ContactPoint**: `ContactPointCreated`, `ContactPointUpdated`, `ContactPointVerified`, `ContactPointDeleted`
+- **Party**: `PartyCreated`, `PartyUpdated`, `PartyDeleted`, `PartyRestored`
+- **ContactPoint**: `ContactPointCreated`, `ContactPointUpdated`, `ContactPointVerified`, `ContactPointDeleted`, `ContactPointRestored`, `ContactPointBounced`, `ContactPointMarkedUnreachable`, `ContactPointVerificationFailed`, `ContactPointVerificationExpired`, `ContactPointPurposeAttached`, `ContactPointPurposeDetached`
+- **Address**: `AddressCreated`, `AddressUpdated`, `AddressDeleted`, `AddressRestored`, `AddressValidated`, `AddressValidationFailed`
+- **Relationship**: `RelationshipCreated`, `RelationshipUpdated`, `RelationshipEnded`, `RelationshipDeleted`
+- **RoleAssignment**: `RoleAssignmentCreated`, `RoleAssignmentUpdated`, `RoleAssignmentExpired`, `RoleAssignmentDeleted`
 - **Consent**: `ConsentGranted`, `ConsentRevoked`
 - **DNC**: `DncRuleCreated`, `DncRuleRemoved`
 - **Resolver**: `ContactResolved`
