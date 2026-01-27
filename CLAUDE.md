@@ -51,32 +51,68 @@ ddev quality         # Full quality checks
 src/
 ├── Contracts/               # Interfaces
 │   └── Registries/          # Registry contracts
-├── Models/                  # Eloquent models
+├── Models/                  # Eloquent models (10 models)
 ├── Traits/                  # Contactable trait
 ├── Events/                  # Domain events
-│   ├── Party/
-│   ├── ContactPoint/
-│   ├── Consent/
-│   ├── Dnc/
-│   └── Resolver/
-├── Registries/              # Registry implementations
-├── Normalizers/             # Channel normalizers
-├── Resolver/                # Contact resolution
-├── Checkers/                # Policy checkers
-└── Support/                 # Utilities
+│   ├── Party/               # PartyCreated, PartyUpdated, PartyDeleted
+│   ├── ContactPoint/        # ContactPointCreated, Updated, Verified, Deleted
+│   ├── Consent/             # ConsentGranted, ConsentRevoked
+│   ├── Dnc/                 # DncRuleCreated, DncRuleRemoved
+│   └── Resolver/            # ContactResolved
+├── Registries/              # Config-based registry implementations
+├── Normalizers/             # Email, Phone normalizers
+├── Resolver/                # Contact resolution engine
+├── Checkers/                # DNC, Consent, Scope hierarchy checkers
+└── Support/                 # Utilities (generators, result objects)
 
 database/
-├── migrations/              # Database migrations
+├── migrations/              # 10 database migrations
 └── factories/               # Model factories
 ```
 
+### Core Models
+
+| Model | Table | Description |
+|-------|-------|-------------|
+| `Party` | `heyyou_parties` | Identity map linking to consumer models |
+| `PartyRelationship` | `heyyou_party_relationships` | Links between parties (employment, etc.) |
+| `ContactPoint` | `heyyou_contact_points` | Email, phone, social handles |
+| `ContactPointPurpose` | `heyyou_contact_point_purposes` | Purpose tags on contact points |
+| `Address` | `heyyou_addresses` | Physical addresses |
+| `RoleAssignment` | `heyyou_role_assignments` | Role assignments within scopes |
+| `PartyConsent` | `heyyou_party_consents` | Party-level consent records |
+| `ContactPointConsent` | `heyyou_contact_point_consents` | Contact-point-level consent |
+| `DoNotContact` | `heyyou_do_not_contacts` | DNC blocking rules |
+| `VerificationEvent` | `heyyou_verification_events` | Verification history (optional) |
+
+### Core Contracts
+
+| Contract | Default Implementation | Description |
+|----------|----------------------|-------------|
+| `ContactResolver` | `DefaultContactResolver` | Contact resolution algorithm |
+| `DncChecker` | `DefaultDncChecker` | DNC rule checking |
+| `ConsentChecker` | `DefaultConsentChecker` | Consent verification |
+| `ScopeHierarchyResolver` | `RelationshipBasedScopeResolver` | Scope traversal |
+| `ChannelNormalizer` | `EmailNormalizer`, `PhoneNormalizer` | Value normalization |
+| `EventDispatcher` | `LaravelEventDispatcher` | Event dispatching |
+
+### Registry Contracts
+
+| Contract | Default Implementation |
+|----------|----------------------|
+| `ChannelRegistry` | `ConfigChannelRegistry` |
+| `PurposeRegistry` | `ConfigPurposeRegistry` |
+| `RoleRegistry` | `ConfigRoleRegistry` |
+| `RelationshipTypeRegistry` | `ConfigRelationshipTypeRegistry` |
+| `ConsentCategoryRegistry` | `ConfigConsentCategoryRegistry` |
+| `NormalizerRegistry` | `DefaultNormalizerRegistry` |
+
 ### Core Concepts
 
-#### 1. Party Model (Identity Map)
-The `Party` model is a thin identity map linking to consumer models (User, Company, Location).
+#### 1. Contactable Trait
+Consumer models use the `Contactable` trait to integrate with HeyYou:
 
 ```php
-// Consumer models use the Contactable trait
 class User extends Model
 {
     use Contactable;
@@ -90,11 +126,10 @@ class User extends Model
 // Party is auto-created when consumer is created
 $user = User::create(['name' => 'John']);
 $user->party; // Party instance
+$user->contactPoints; // HasManyThrough to contact points
 ```
 
-#### 2. Contact Points
-Contact points store normalized contact information with channel-specific normalization.
-
+#### 2. Contact Points with Normalization
 ```php
 $party->contactPoints()->create([
     'channel' => 'email',
@@ -105,37 +140,7 @@ $party->contactPoints()->create([
 
 Channels: email, phone, sms, whatsapp, signal, facebook, instagram, linkedin, twitter, tiktok
 
-#### 3. Party Relationships
-Links parties together with typed relationships.
-
-```php
-PartyRelationship::create([
-    'from_party_id' => $employee->party->id,
-    'to_party_id' => $company->party->id,
-    'relationship_type' => 'employment',  // employment, contractor, location_of, member_of, parent_of
-]);
-```
-
-#### 4. Role Assignments
-Assigns roles to parties within a scope (organization/location).
-
-```php
-RoleAssignment::create([
-    'party_id' => $person->party->id,
-    'scope_party_id' => $company->party->id,
-    'role' => 'accounts_payable_contact',
-    'priority' => 1,
-]);
-```
-
-#### 5. Policy Layer (Consent & DNC)
-- **PartyConsent**: Party-level consent by channel/category
-- **ContactPointConsent**: Contact-point-level consent (overrides party)
-- **DoNotContact**: Blocking rules by party, channel, purpose, or contact point
-
-#### 6. Contact Resolution
-The resolver finds the best contact points based on purpose, channel, and policies.
-
+#### 3. Contact Resolution
 ```php
 $result = app(ContactResolver::class)->resolve(new ResolverRequest(
     targetParty: $company->party,
@@ -158,39 +163,10 @@ $best = $result->best(); // ResolverMatch with contactPoint, owningParty, rank
 7. Priority field
 8. Created date (tiebreaker)
 
-### Registry System
-
-All classification values come from registries (not enums):
-
-- `ChannelRegistry` - email, phone, sms, etc.
-- `PurposeRegistry` - billing, shipping, hr, etc.
-- `RoleRegistry` - accounts_payable_contact, hr_contact, etc.
-- `RelationshipTypeRegistry` - employment, location_of, etc.
-- `ConsentCategoryRegistry` - transactional, marketing, etc.
-- `NormalizerRegistry` - channel-specific normalizers
-
-Default implementations use config arrays. Replace with custom implementations for database-backed registries.
-
-### Events
-
-Events are dispatched for all model lifecycle changes:
-- Party: Created, Updated, Deleted
-- ContactPoint: Created, Updated, Verified, Deleted
-- Consent: Granted, Revoked
-- DNC: RuleCreated, RuleRemoved
-- Resolver: ContactResolved
-
-### Factories
-
-Model factories are provided for testing:
-
-```php
-Party::factory()->person()->create();
-Party::factory()->organization()->create();
-ContactPoint::factory()->email()->verified()->primary()->create();
-Address::factory()->billing()->forParty($party)->create();
-RoleAssignment::factory()->accountsPayable()->forParty($person)->scopedTo($company)->create();
-```
+#### 4. Policy Layer
+- **PartyConsent/ContactPointConsent**: Layered consent (contact-point overrides party)
+- **DoNotContact**: Blocking rules by party, channel, purpose, or contact point
+- **Precedence**: Contact-point-specific > channel-specific > generic
 
 ## Testing
 
@@ -209,7 +185,17 @@ tests/
 │   ├── Normalizers/
 │   └── ...
 └── Fixtures/
-    └── Models/              # Test models (User, Company)
+    └── Models/              # Test models (User, Company, Location)
+```
+
+### Factories
+
+```php
+Party::factory()->person()->create();
+Party::factory()->organization()->create();
+ContactPoint::factory()->email()->verified()->primary()->create();
+Address::factory()->billing()->forParty($party)->create();
+RoleAssignment::factory()->accountsPayable()->forParty($person)->scopedTo($company)->create();
 ```
 
 ## Key Files
@@ -218,3 +204,30 @@ tests/
 - `src/HeyYouServiceProvider.php` - Service container bindings
 - `src/Resolver/DefaultContactResolver.php` - Contact resolution algorithm
 - `src/Traits/Contactable.php` - Trait for consumer models
+- `src/Checkers/DefaultDncChecker.php` - DNC policy checking
+- `src/Checkers/DefaultConsentChecker.php` - Consent policy checking
+- `src/Checkers/RelationshipBasedScopeResolver.php` - Scope hierarchy traversal
+
+## Events Dispatched
+
+- **Party**: `PartyCreated`, `PartyUpdated`, `PartyDeleted`
+- **ContactPoint**: `ContactPointCreated`, `ContactPointUpdated`, `ContactPointVerified`, `ContactPointDeleted`
+- **Consent**: `ConsentGranted`, `ConsentRevoked`
+- **DNC**: `DncRuleCreated`, `DncRuleRemoved`
+- **Resolver**: `ContactResolved`
+
+## Documentation
+
+Full documentation available in `docs/`:
+
+- [Quickstart Guide](docs/quickstart.md)
+- [Installation](docs/installation.md)
+- [Contact Points](docs/contact-points.md)
+- [Contact Resolution](docs/resolver.md)
+- [Policies (Consent & DNC)](docs/policies.md)
+- [Party Relationships & Roles](docs/relationships.md)
+- [Addresses](docs/addresses.md)
+- [Events](docs/events.md)
+- [Custom Registries](docs/registries.md)
+- [Configuration](docs/configuration.md)
+- [Full Specification](docs/spec.md)
