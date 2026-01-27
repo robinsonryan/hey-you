@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Database\Eloquent\Model;
 use RobinsonRyan\HeyYou\Events\Party\PartyCreated;
 use RobinsonRyan\HeyYou\Events\Party\PartyDeleted;
+use RobinsonRyan\HeyYou\Events\Party\PartyRestored;
 use RobinsonRyan\HeyYou\Events\Party\PartyUpdated;
 use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
@@ -38,6 +39,15 @@ describe('PartyUpdated', function () {
 describe('PartyDeleted', function () {
     it('contains the party and partyable', function () {
         $event = new PartyDeleted($this->party, $this->user);
+
+        expect($event->party)->toBeInstanceOf(Party::class)
+            ->and($event->partyable)->toBeInstanceOf(Model::class);
+    });
+});
+
+describe('PartyRestored', function () {
+    it('contains the party and partyable', function () {
+        $event = new PartyRestored($this->party, $this->user);
 
         expect($event->party)->toBeInstanceOf(Party::class)
             ->and($event->partyable)->toBeInstanceOf(Model::class);

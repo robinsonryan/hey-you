@@ -10,7 +10,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
 use RobinsonRyan\HeyYou\Database\Factories\AddressFactory;
+use RobinsonRyan\HeyYou\Events\Address\AddressCreated;
+use RobinsonRyan\HeyYou\Events\Address\AddressDeleted;
+use RobinsonRyan\HeyYou\Events\Address\AddressRestored;
+use RobinsonRyan\HeyYou\Events\Address\AddressUpdated;
+use RobinsonRyan\HeyYou\Events\Address\AddressValidated;
+use RobinsonRyan\HeyYou\Events\Address\AddressValidationFailed;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
 
 /**
@@ -47,6 +54,46 @@ final class Address extends Model
     protected static function newFactory(): AddressFactory
     {
         return AddressFactory::new();
+    }
+
+    protected static function booted(): void
+    {
+        self::created(function (Address $address) {
+            app(EventDispatcher::class)->dispatch(new AddressCreated($address, $address->party));
+        });
+
+        self::updated(function (Address $address) {
+            $changes = $address->getChanges();
+
+            // Check for validation_status changes
+            if ($address->wasChanged('validation_status')) {
+                if ($address->validation_status === self::STATUS_VERIFIED) {
+                    app(EventDispatcher::class)->dispatch(new AddressValidated(
+                        $address,
+                        ['status' => $address->validation_status, 'geocode' => $address->geocode],
+                    ));
+                } elseif ($address->validation_status === self::STATUS_INVALID) {
+                    app(EventDispatcher::class)->dispatch(new AddressValidationFailed(
+                        $address,
+                        ['status' => $address->validation_status],
+                    ));
+                }
+            }
+
+            app(EventDispatcher::class)->dispatch(new AddressUpdated(
+                $address,
+                $address->party,
+                $changes,
+            ));
+        });
+
+        self::deleted(function (Address $address) {
+            app(EventDispatcher::class)->dispatch(new AddressDeleted($address, $address->party));
+        });
+
+        self::restored(function (Address $address) {
+            app(EventDispatcher::class)->dispatch(new AddressRestored($address, $address->party));
+        });
     }
 
     public const STATUS_UNVERIFIED = 'unverified';

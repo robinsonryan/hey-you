@@ -10,7 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
 use RobinsonRyan\HeyYou\Database\Factories\RoleAssignmentFactory;
+use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentCreated;
+use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentDeleted;
+use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentExpired;
+use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentUpdated;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
 
 /**
@@ -38,6 +43,35 @@ final class RoleAssignment extends Model
     protected static function newFactory(): RoleAssignmentFactory
     {
         return RoleAssignmentFactory::new();
+    }
+
+    protected static function booted(): void
+    {
+        self::created(function (RoleAssignment $roleAssignment) {
+            app(EventDispatcher::class)->dispatch(new RoleAssignmentCreated(
+                $roleAssignment,
+                $roleAssignment->party,
+                $roleAssignment->scopeParty,
+            ));
+        });
+
+        self::updated(function (RoleAssignment $roleAssignment) {
+            $changes = $roleAssignment->getChanges();
+
+            app(EventDispatcher::class)->dispatch(new RoleAssignmentUpdated(
+                $roleAssignment,
+                $changes,
+            ));
+
+            // Dispatch RoleAssignmentExpired if valid_to was just set
+            if (array_key_exists('valid_to', $changes) && $roleAssignment->valid_to !== null) {
+                app(EventDispatcher::class)->dispatch(new RoleAssignmentExpired($roleAssignment));
+            }
+        });
+
+        self::deleted(function (RoleAssignment $roleAssignment) {
+            app(EventDispatcher::class)->dispatch(new RoleAssignmentDeleted($roleAssignment));
+        });
     }
 
     /**

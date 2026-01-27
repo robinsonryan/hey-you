@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
+use RobinsonRyan\HeyYou\Events\Relationship\RelationshipCreated;
+use RobinsonRyan\HeyYou\Events\Relationship\RelationshipDeleted;
+use RobinsonRyan\HeyYou\Events\Relationship\RelationshipEnded;
+use RobinsonRyan\HeyYou\Events\Relationship\RelationshipUpdated;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
 
 /**
@@ -29,6 +34,35 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
 final class PartyRelationship extends Model
 {
     use SoftDeletes;
+
+    protected static function booted(): void
+    {
+        self::created(function (PartyRelationship $relationship) {
+            app(EventDispatcher::class)->dispatch(new RelationshipCreated(
+                $relationship,
+                $relationship->fromParty,
+                $relationship->toParty,
+            ));
+        });
+
+        self::updated(function (PartyRelationship $relationship) {
+            $changes = $relationship->getChanges();
+
+            app(EventDispatcher::class)->dispatch(new RelationshipUpdated(
+                $relationship,
+                $changes,
+            ));
+
+            // Dispatch RelationshipEnded if valid_to was just set
+            if (array_key_exists('valid_to', $changes) && $relationship->valid_to !== null) {
+                app(EventDispatcher::class)->dispatch(new RelationshipEnded($relationship));
+            }
+        });
+
+        self::deleted(function (PartyRelationship $relationship) {
+            app(EventDispatcher::class)->dispatch(new RelationshipDeleted($relationship));
+        });
+    }
 
     /**
      * @var list<string>

@@ -7,6 +7,9 @@ namespace RobinsonRyan\HeyYou\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointPurposeAttached;
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointPurposeDetached;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
 
 /**
@@ -21,6 +24,27 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class ContactPointPurpose extends Model
 {
+    protected static function booted(): void
+    {
+        self::created(function (ContactPointPurpose $purpose) {
+            app(EventDispatcher::class)->dispatch(new ContactPointPurposeAttached(
+                $purpose->contactPoint,
+                $purpose->purpose,
+                [
+                    'priority' => $purpose->priority,
+                    'is_preferred' => $purpose->is_preferred,
+                ],
+            ));
+        });
+
+        self::deleted(function (ContactPointPurpose $purpose) {
+            app(EventDispatcher::class)->dispatch(new ContactPointPurposeDetached(
+                $purpose->contactPoint,
+                $purpose->purpose,
+            ));
+        });
+    }
+
     /**
      * @var array<string, mixed>
      */

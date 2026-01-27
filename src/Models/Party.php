@@ -13,6 +13,7 @@ use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
 use RobinsonRyan\HeyYou\Database\Factories\PartyFactory;
 use RobinsonRyan\HeyYou\Events\Party\PartyCreated;
 use RobinsonRyan\HeyYou\Events\Party\PartyDeleted;
+use RobinsonRyan\HeyYou\Events\Party\PartyRestored;
 use RobinsonRyan\HeyYou\Events\Party\PartyUpdated;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
 
@@ -96,6 +97,13 @@ final class Party extends Model
             $partyable = self::safeLoadPartyable($party);
             if ($partyable !== null) {
                 app(EventDispatcher::class)->dispatch(new PartyDeleted($party, $partyable));
+            }
+        });
+
+        self::restored(function (Party $party) {
+            $partyable = self::safeLoadPartyable($party);
+            if ($partyable !== null) {
+                app(EventDispatcher::class)->dispatch(new PartyRestored($party, $partyable));
             }
         });
     }

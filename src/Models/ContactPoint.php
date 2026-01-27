@@ -13,8 +13,11 @@ use Illuminate\Support\Carbon;
 use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
 use RobinsonRyan\HeyYou\Contracts\Registries\NormalizerRegistry;
 use RobinsonRyan\HeyYou\Database\Factories\ContactPointFactory;
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointBounced;
 use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointCreated;
 use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointDeleted;
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointMarkedUnreachable;
+use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointRestored;
 use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointUpdated;
 use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointVerified;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
@@ -135,6 +138,22 @@ final class ContactPoint extends Model
                 ));
             }
 
+            // Check if status changed to bounced
+            if ($contactPoint->wasChanged('status') && $contactPoint->status === self::STATUS_BOUNCED) {
+                app(EventDispatcher::class)->dispatch(new ContactPointBounced(
+                    $contactPoint,
+                    ['status' => $contactPoint->status],
+                ));
+            }
+
+            // Check if status changed to unreachable
+            if ($contactPoint->wasChanged('status') && $contactPoint->status === self::STATUS_UNREACHABLE) {
+                app(EventDispatcher::class)->dispatch(new ContactPointMarkedUnreachable(
+                    $contactPoint,
+                    'Status changed to unreachable',
+                ));
+            }
+
             app(EventDispatcher::class)->dispatch(new ContactPointUpdated(
                 $contactPoint,
                 $contactPoint->party,
@@ -144,6 +163,13 @@ final class ContactPoint extends Model
 
         self::deleted(function (ContactPoint $contactPoint) {
             app(EventDispatcher::class)->dispatch(new ContactPointDeleted(
+                $contactPoint,
+                $contactPoint->party,
+            ));
+        });
+
+        self::restored(function (ContactPoint $contactPoint) {
+            app(EventDispatcher::class)->dispatch(new ContactPointRestored(
                 $contactPoint,
                 $contactPoint->party,
             ));

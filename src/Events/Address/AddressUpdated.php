@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace RobinsonRyan\HeyYou\Events\Address;
+
+use RobinsonRyan\HeyYou\Models\Address;
+use RobinsonRyan\HeyYou\Models\Party;
+
+final readonly class AddressUpdated
+{
+    /**
+     * @param  array<string, mixed>  $changedAttributes
+     */
+    public function __construct(
+        public Address $address,
+        public Party $party,
+        public array $changedAttributes,
+    ) {}
+}
