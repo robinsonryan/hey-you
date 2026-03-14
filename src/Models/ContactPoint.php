@@ -21,10 +21,11 @@ use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointRestored;
 use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointUpdated;
 use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointVerified;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
+use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 
 /**
- * @property int $id
- * @property int $party_id
+ * @property string $id
+ * @property string $party_id
  * @property string $channel
  * @property string $value_raw
  * @property string $value_normalized
@@ -46,6 +47,8 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class ContactPoint extends Model
 {
+    use ConfiguresIdentifiers;
+
     /** @use HasFactory<ContactPointFactory> */
     use HasFactory;
 

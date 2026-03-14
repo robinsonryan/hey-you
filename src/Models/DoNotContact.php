@@ -14,17 +14,18 @@ use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
 use RobinsonRyan\HeyYou\Events\Dnc\DncRuleCreated;
 use RobinsonRyan\HeyYou\Events\Dnc\DncRuleRemoved;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
+use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 
 /**
- * @property int $id
- * @property int $party_id
- * @property int|null $contact_point_id
+ * @property string $id
+ * @property string $party_id
+ * @property string|null $contact_point_id
  * @property string|null $channel
  * @property string|null $purpose
  * @property string|null $reason
  * @property string $source
  * @property string|null $created_by_type
- * @property int|string|null $created_by_id
+ * @property string|null $created_by_id
  * @property Carbon $effective_at
  * @property Carbon|null $expires_at
  * @property Carbon|null $created_at
@@ -36,6 +37,7 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class DoNotContact extends Model
 {
+    use ConfiguresIdentifiers;
     use SoftDeletes;
 
     /**

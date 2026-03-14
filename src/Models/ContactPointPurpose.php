@@ -11,10 +11,11 @@ use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
 use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointPurposeAttached;
 use RobinsonRyan\HeyYou\Events\ContactPoint\ContactPointPurposeDetached;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
+use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 
 /**
- * @property int $id
- * @property int $contact_point_id
+ * @property string $id
+ * @property string $contact_point_id
  * @property string $purpose
  * @property int $priority
  * @property bool $is_preferred
@@ -24,6 +25,7 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class ContactPointPurpose extends Model
 {
+    use ConfiguresIdentifiers;
     protected static function booted(): void
     {
         self::created(function (ContactPointPurpose $purpose) {

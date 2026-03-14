@@ -10,6 +10,72 @@ HeyYou is a Laravel package for modeling contactable entities, contact methods, 
 **PHP:** 8.2+
 **Laravel:** 11.x, 12.x
 
+## UUID7 Primary Key Conventions (CRITICAL)
+
+This project uses PostgreSQL 18 with its native `uuidv7()` function. The DATABASE generates UUIDs, NOT Laravel.
+
+### In Migrations: Database generates the UUID
+
+```php
+// CORRECT: Let PostgreSQL generate the UUID7
+$table->uuid('id')->primary()->default(DB::raw('uuidv7()'));
+
+// CORRECT: Foreign keys use uuid(), not foreignId()
+$table->uuid('party_id');
+$table->foreign('party_id')->references('id')->on('heyyou_parties');
+// Or shorthand:
+$table->foreignUuid('party_id')->constrained('heyyou_parties');
+```
+
+```php
+// WRONG: Never use auto-incrementing IDs
+$table->id();
+
+// WRONG: Never use foreignId() - that assumes bigint auto-increment
+$table->foreignId('party_id');
+```
+
+### In Models: Configure for UUID PKs, but do NOT generate them
+
+```php
+// CORRECT: Tell Laravel the PK is a non-incrementing string, but do NOT generate it
+class Party extends Model
+{
+    public $incrementing = false;
+    protected $keyType = 'string';
+    // That's it. No HasUuids, no newUniqueId(), no boot/creating hooks for IDs.
+}
+```
+
+```php
+// WRONG: Never use Laravel's HasUuids trait
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+class Party extends Model
+{
+    use HasUuids; // NO! This makes Laravel generate UUIDs, bypassing Postgres uuidv7()
+}
+
+// WRONG: Never override newUniqueId()
+public function newUniqueId(): string
+{
+    return Str::uuid7()->toString(); // NO! Postgres handles this.
+}
+```
+
+### The ONE Exception: Pre-persist ID Generation
+
+The `Uuid7Generator` class (`src/Support/Uuid7Generator.php`) exists ONLY for cases where you need an ID before the record hits the database (e.g., `Model::factory()->make()` without persisting, or client-side ID generation for specific business reasons). In normal CRUD operations, Postgres generates the ID via `uuidv7()`.
+
+### Quick Reference
+
+| Concern | Correct Approach | Wrong Approach |
+|---------|-----------------|----------------|
+| PK in migration | `$table->uuid('id')->primary()->default(DB::raw('uuidv7()'))` | `$table->id()` |
+| FK in migration | `$table->uuid('col')` or `$table->foreignUuid('col')` | `$table->foreignId('col')` |
+| Model PK config | `$incrementing = false; $keyType = 'string';` | `use HasUuids;` |
+| UUID generation | Postgres `uuidv7()` at insert time | `Str::uuid7()` in model boot |
+| Pre-persist IDs | `Uuid7Generator::generate()` (rare, only when needed) | `HasUuids` trait |
+
 ## Development Commands
 
 ```bash

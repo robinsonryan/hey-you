@@ -26,12 +26,12 @@ use RobinsonRyan\HeyYou\Registries\ConfigRelationshipTypeRegistry;
 use RobinsonRyan\HeyYou\Registries\ConfigRoleRegistry;
 use RobinsonRyan\HeyYou\Registries\DefaultNormalizerRegistry;
 use RobinsonRyan\HeyYou\Resolver\DefaultContactResolver;
-use RobinsonRyan\HeyYou\Support\AutoIncrementGenerator;
+use RobinsonRyan\HeyYou\Support\Uuid7Generator;
 use RobinsonRyan\HeyYou\Support\DefaultContactPointPurposeManager;
 
 describe('Service Provider bindings', function () {
     it('binds IdentifierGenerator', function () {
-        expect(app(IdentifierGenerator::class))->toBeInstanceOf(AutoIncrementGenerator::class);
+        expect(app(IdentifierGenerator::class))->toBeInstanceOf(Uuid7Generator::class);
     });
 
     it('binds ChannelRegistry', function () {

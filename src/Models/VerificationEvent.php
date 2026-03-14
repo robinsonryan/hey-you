@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
+use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 
 /**
- * @property int $id
- * @property int $contact_point_id
+ * @property string $id
+ * @property string $contact_point_id
  * @property string $status
  * @property string $method
  * @property array<string, mixed>|null $evidence
@@ -24,6 +25,7 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class VerificationEvent extends Model
 {
+    use ConfiguresIdentifiers;
     public const STATUS_PENDING = 'pending';
 
     public const STATUS_VERIFIED = 'verified';

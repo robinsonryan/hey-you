@@ -17,11 +17,12 @@ use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentDeleted;
 use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentExpired;
 use RobinsonRyan\HeyYou\Events\RoleAssignment\RoleAssignmentUpdated;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
+use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 
 /**
- * @property int $id
- * @property int $party_id
- * @property int $scope_party_id
+ * @property string $id
+ * @property string $party_id
+ * @property string $scope_party_id
  * @property string $role
  * @property int $priority
  * @property Carbon|null $valid_from
@@ -35,6 +36,8 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class RoleAssignment extends Model
 {
+    use ConfiguresIdentifiers;
+
     /** @use HasFactory<RoleAssignmentFactory> */
     use HasFactory;
 

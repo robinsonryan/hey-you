@@ -24,7 +24,7 @@ return [
     | Must implement \RobinsonRyan\HeyYou\Contracts\IdentifierGenerator.
     |
     */
-    'identifier_generator' => RobinsonRyan\HeyYou\Support\AutoIncrementGenerator::class,
+    'identifier_generator' => RobinsonRyan\HeyYou\Support\Uuid7Generator::class,
 
     /*
     |--------------------------------------------------------------------------

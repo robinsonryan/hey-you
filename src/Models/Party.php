@@ -16,11 +16,12 @@ use RobinsonRyan\HeyYou\Events\Party\PartyDeleted;
 use RobinsonRyan\HeyYou\Events\Party\PartyRestored;
 use RobinsonRyan\HeyYou\Events\Party\PartyUpdated;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
+use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 
 /**
- * @property int $id
+ * @property string $id
  * @property string $partyable_type
- * @property int|string $partyable_id
+ * @property string $partyable_id
  * @property string $display_name_cached
  * @property array<string, mixed>|null $metadata
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -38,6 +39,8 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class Party extends Model
 {
+    use ConfiguresIdentifiers;
+
     /** @use HasFactory<PartyFactory> */
     use HasFactory;
 

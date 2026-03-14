@@ -15,11 +15,12 @@ use RobinsonRyan\HeyYou\Events\Relationship\RelationshipDeleted;
 use RobinsonRyan\HeyYou\Events\Relationship\RelationshipEnded;
 use RobinsonRyan\HeyYou\Events\Relationship\RelationshipUpdated;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
+use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 
 /**
- * @property int $id
- * @property int $from_party_id
- * @property int $to_party_id
+ * @property string $id
+ * @property string $from_party_id
+ * @property string $to_party_id
  * @property string $relationship_type
  * @property string|null $label
  * @property array<string, mixed>|null $metadata
@@ -33,6 +34,7 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class PartyRelationship extends Model
 {
+    use ConfiguresIdentifiers;
     use SoftDeletes;
 
     protected static function booted(): void

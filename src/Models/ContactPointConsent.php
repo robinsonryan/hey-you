@@ -12,10 +12,11 @@ use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
 use RobinsonRyan\HeyYou\Events\Consent\ConsentGranted;
 use RobinsonRyan\HeyYou\Events\Consent\ConsentRevoked;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
+use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 
 /**
- * @property int $id
- * @property int $contact_point_id
+ * @property string $id
+ * @property string $contact_point_id
  * @property string $purpose_category
  * @property string $status
  * @property Carbon $captured_at
@@ -28,6 +29,7 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class ContactPointConsent extends Model
 {
+    use ConfiguresIdentifiers;
     use SoftDeletes;
 
     public const STATUS_OPTED_IN = 'opted_in';

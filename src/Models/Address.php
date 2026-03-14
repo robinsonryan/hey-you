@@ -19,10 +19,11 @@ use RobinsonRyan\HeyYou\Events\Address\AddressUpdated;
 use RobinsonRyan\HeyYou\Events\Address\AddressValidated;
 use RobinsonRyan\HeyYou\Events\Address\AddressValidationFailed;
 use RobinsonRyan\HeyYou\Support\TablePrefixer;
+use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 
 /**
- * @property int $id
- * @property int $party_id
+ * @property string $id
+ * @property string $party_id
  * @property string $purpose
  * @property bool $is_primary
  * @property string|null $label
@@ -46,6 +47,8 @@ use RobinsonRyan\HeyYou\Support\TablePrefixer;
  */
 final class Address extends Model
 {
+    use ConfiguresIdentifiers;
+
     /** @use HasFactory<AddressFactory> */
     use HasFactory;
 
