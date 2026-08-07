@@ -7,8 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 HeyYou is a Laravel package for modeling contactable entities, contact methods, and deterministic contact resolution.
 
 **Namespace:** `RobinsonRyan\HeyYou`
-**PHP:** 8.2+
-**Laravel:** 11.x, 12.x
+**PHP:** 8.2 – 8.5
+**Laravel:** 11.x, 12.x, 13.x
+**Dev matrix:** testbench 9/10/11, Pest 3/4/5, PHPUnit 11/12/13 (Pest 5 + PHPUnit 13
+needs PHP 8.4; on PHP 8.2/8.3 Composer resolves the older rungs)
+**Database:** PostgreSQL 18+ only — the schema uses native `uuidv7()` column defaults
 
 ## UUID7 Primary Key Conventions (CRITICAL)
 
@@ -38,14 +41,23 @@ $table->foreignId('party_id');
 ### In Models: Configure for UUID PKs, but do NOT generate them
 
 ```php
-// CORRECT: Tell Laravel the PK is a non-incrementing string, but do NOT generate it
+// CORRECT: Tell Laravel the DB assigns a string PK, but do NOT generate it here
 class Party extends Model
 {
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = true;   // "the DB assigns the key on insert" — NOT auto-increment
+    protected $keyType = 'string'; // it is a UUID, not an int
     // That's it. No HasUuids, no newUniqueId(), no boot/creating hooks for IDs.
 }
 ```
+
+`$incrementing = true` reads wrong at first glance. In Eloquent it does not mean
+"auto-increment integer" — it means "the database assigns the key during INSERT",
+which is exactly what a `uuidv7()` column default does. It is what makes Eloquent
+compile the INSERT through `insertGetId()`, which on PostgreSQL appends
+`returning "id"` and hydrates the generated UUID back onto the model. With
+`$incrementing = false` the row still gets its UUID in the database, but the model
+returned by `create()` has a **null key** — every downstream relation write then
+fails. Use the `ConfiguresIdentifiers` trait rather than setting these by hand.
 
 ```php
 // WRONG: Never use Laravel's HasUuids trait
@@ -72,7 +84,7 @@ The `Uuid7Generator` class (`src/Support/Uuid7Generator.php`) exists ONLY for ca
 |---------|-----------------|----------------|
 | PK in migration | `$table->uuid('id')->primary()->default(DB::raw('uuidv7()'))` | `$table->id()` |
 | FK in migration | `$table->uuid('col')` or `$table->foreignUuid('col')` | `$table->foreignId('col')` |
-| Model PK config | `$incrementing = false; $keyType = 'string';` | `use HasUuids;` |
+| Model PK config | `use ConfiguresIdentifiers;` (`$incrementing = true; $keyType = 'string';`) | `use HasUuids;` or `$incrementing = false` |
 | UUID generation | Postgres `uuidv7()` at insert time | `Str::uuid7()` in model boot |
 | Pre-persist IDs | `Uuid7Generator::generate()` (rare, only when needed) | `HasUuids` trait |
 
@@ -236,7 +248,18 @@ $best = $result->best(); // ResolverMatch with contactPoint, owningParty, rank
 
 ## Testing
 
-Uses Pest with Orchestra Testbench. Tests run against SQLite in-memory.
+Uses Pest with Orchestra Testbench, running against **a real PostgreSQL 18 database**
+(the DDEV `db` service, database `testing`) — not SQLite. The schema depends on
+`uuidv7()` column defaults, which SQLite cannot express, so an in-memory SQLite run
+fails on the very first migration.
+
+`tests/TestCase.php` uses `RefreshDatabase`: migrations run once per process and each
+test is wrapped in a transaction. The connection is overridable via
+`HEYYOU_TEST_DB_HOST` / `_PORT` / `_DATABASE` / `_USERNAME` / `_PASSWORD`.
+
+Fixture consumer models (`tests/Fixtures/Models/{User,Company}`) carry UUID7 keys like
+real consumers do, so a placeholder `partyable_id` must be a UUID — use the
+`fakePartyableId()` helper from `tests/Pest.php`, never an integer.
 
 ```
 tests/

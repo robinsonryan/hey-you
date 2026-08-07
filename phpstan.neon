@@ -4,6 +4,8 @@ includes:
 parameters:
     paths:
         - src
+        # Fixture consumer models are the only classes that use the Contactable
+        # trait; without them PHPStan cannot analyse it (trait.unused).
+        - tests/Fixtures
     level: 8
     ignoreErrors: []
-    checkMissingIterableValueType: false

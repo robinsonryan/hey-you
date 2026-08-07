@@ -18,7 +18,7 @@ it('implements ContactResolver contract', function () {
 it('returns ResolverResult from resolve method', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test Party',
     ]);
 
@@ -37,7 +37,7 @@ it('returns ResolverResult from resolve method', function () {
 it('returns empty result when no contact points exist', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test Party',
     ]);
 
@@ -57,7 +57,7 @@ it('returns empty result when no contact points exist', function () {
 it('returns empty result when no matching channel exists', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test Party',
     ]);
 
@@ -83,7 +83,7 @@ it('returns empty result when no matching channel exists', function () {
 it('populates match with correct owning party', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test Party',
     ]);
 
@@ -109,7 +109,7 @@ it('populates match with correct owning party', function () {
 it('assigns sequential ranks to matches', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test Party',
     ]);
 

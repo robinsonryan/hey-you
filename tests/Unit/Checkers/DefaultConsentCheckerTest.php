@@ -16,7 +16,7 @@ beforeEach(function () {
 it('returns allowed with level none when no consent records exist', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -38,7 +38,7 @@ it('returns allowed with level none when no consent records exist', function () 
 it('returns allowed when contact point has opted in', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -70,7 +70,7 @@ it('returns allowed when contact point has opted in', function () {
 it('returns denied when contact point has opted out', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -99,7 +99,7 @@ it('returns denied when contact point has opted out', function () {
 it('returns allowed when party has opted in and no contact point consent', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -131,7 +131,7 @@ it('returns allowed when party has opted in and no contact point consent', funct
 it('returns denied when party has opted out and no contact point consent', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -161,7 +161,7 @@ it('returns denied when party has opted out and no contact point consent', funct
 it('prefers contact point consent over party consent (more specific wins)', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -202,7 +202,7 @@ it('prefers contact point consent over party consent (more specific wins)', func
 it('uses most recent consent when multiple consents exist at same level', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -241,7 +241,7 @@ it('uses most recent consent when multiple consents exist at same level', functi
 it('prefers channel-specific party consent over generic party consent', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -282,7 +282,7 @@ it('prefers channel-specific party consent over generic party consent', function
 it('ignores soft deleted consent records', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -313,7 +313,7 @@ it('ignores soft deleted consent records', function () {
 it('only considers consent for the specified purpose category', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 

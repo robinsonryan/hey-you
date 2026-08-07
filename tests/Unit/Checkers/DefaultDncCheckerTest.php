@@ -15,7 +15,7 @@ beforeEach(function () {
 it('returns allowed when no dnc rules exist', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -37,7 +37,7 @@ it('returns allowed when no dnc rules exist', function () {
 it('blocks when party-wide dnc exists', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -69,7 +69,7 @@ it('blocks when party-wide dnc exists', function () {
 it('blocks when channel-specific dnc exists', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -100,7 +100,7 @@ it('blocks when channel-specific dnc exists', function () {
 it('blocks when purpose-specific dnc exists and purpose matches', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -131,7 +131,7 @@ it('blocks when purpose-specific dnc exists and purpose matches', function () {
 it('does not block when purpose-specific dnc exists but purpose does not match', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -161,7 +161,7 @@ it('does not block when purpose-specific dnc exists but purpose does not match',
 it('blocks when channel and purpose combination dnc exists', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -191,7 +191,7 @@ it('blocks when channel and purpose combination dnc exists', function () {
 it('blocks when specific contact point dnc exists', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -222,7 +222,7 @@ it('blocks when specific contact point dnc exists', function () {
 it('does not block when dnc not yet effective', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -251,7 +251,7 @@ it('does not block when dnc not yet effective', function () {
 it('does not block when dnc has expired', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -281,7 +281,7 @@ it('does not block when dnc has expired', function () {
 it('ignores soft deleted dnc rules', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -312,7 +312,7 @@ it('ignores soft deleted dnc rules', function () {
 it('prefers more specific dnc scope over general', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 
@@ -356,7 +356,7 @@ it('prefers more specific dnc scope over general', function () {
 it('does not block different channel than dnc channel', function () {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test User',
     ]);
 

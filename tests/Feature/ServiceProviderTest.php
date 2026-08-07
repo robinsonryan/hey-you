@@ -26,8 +26,8 @@ use RobinsonRyan\HeyYou\Registries\ConfigRelationshipTypeRegistry;
 use RobinsonRyan\HeyYou\Registries\ConfigRoleRegistry;
 use RobinsonRyan\HeyYou\Registries\DefaultNormalizerRegistry;
 use RobinsonRyan\HeyYou\Resolver\DefaultContactResolver;
-use RobinsonRyan\HeyYou\Support\Uuid7Generator;
 use RobinsonRyan\HeyYou\Support\DefaultContactPointPurposeManager;
+use RobinsonRyan\HeyYou\Support\Uuid7Generator;
 
 describe('Service Provider bindings', function () {
     it('binds IdentifierGenerator', function () {

@@ -9,7 +9,7 @@ use RobinsonRyan\HeyYou\Resolver\ResolverRequest;
 it('creates a resolver request with required parameters', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test Party',
     ]);
 
@@ -30,7 +30,7 @@ it('creates a resolver request with required parameters', function () {
 it('defaults scope party to target party', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test Party',
     ]);
 
@@ -46,13 +46,13 @@ it('defaults scope party to target party', function () {
 it('uses explicit scope party when provided', function () {
     $targetParty = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Target Party',
     ]);
 
     $scopeParty = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Scope Party',
     ]);
 
@@ -69,7 +69,7 @@ it('uses explicit scope party when provided', function () {
 it('provides default constraints when none provided', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test Party',
     ]);
 
@@ -90,7 +90,7 @@ it('provides default constraints when none provided', function () {
 it('uses explicit constraints when provided', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Test Party',
     ]);
 

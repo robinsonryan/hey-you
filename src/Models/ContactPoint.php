@@ -118,7 +118,9 @@ final class ContactPoint extends Model
     protected static function booted(): void
     {
         self::saving(function (ContactPoint $contactPoint) {
-            if ($contactPoint->isDirty('value_raw') || $contactPoint->value_normalized === null) {
+            // getAttribute() rather than the property: on an unsaved model the
+            // (non-nullable) normalized value has not been derived yet.
+            if ($contactPoint->isDirty('value_raw') || $contactPoint->getAttribute('value_normalized') === null) {
                 $normalizer = app(NormalizerRegistry::class)->for($contactPoint->channel);
                 $contactPoint->value_normalized = $normalizer->normalize($contactPoint->value_raw);
             }

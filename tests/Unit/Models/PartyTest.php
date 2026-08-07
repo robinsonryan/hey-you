@@ -16,15 +16,17 @@ it('uses the prefixed table name', function () {
 });
 
 it('has fillable attributes', function () {
+    $partyableId = fakePartyableId();
+
     $party = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => $partyableId,
         'display_name_cached' => 'John Doe',
         'metadata' => ['timezone' => 'America/New_York'],
     ]);
 
     expect($party->partyable_type)->toBe(User::class);
-    expect($party->partyable_id)->toBe(1);
+    expect($party->partyable_id)->toBe($partyableId);
     expect($party->display_name_cached)->toBe('John Doe');
     expect($party->metadata)->toBe(['timezone' => 'America/New_York']);
 });
@@ -32,7 +34,7 @@ it('has fillable attributes', function () {
 it('casts metadata to array', function () {
     $party = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
         'metadata' => ['key' => 'value'],
     ]);
@@ -46,13 +48,13 @@ it('casts metadata to array', function () {
 it('has outgoing relationships', function () {
     $party1 = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
     $party2 = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 2,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 
@@ -69,13 +71,13 @@ it('has outgoing relationships', function () {
 it('has incoming relationships', function () {
     $party1 = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
     $party2 = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 2,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 
@@ -92,7 +94,7 @@ it('has incoming relationships', function () {
 it('can be soft deleted', function () {
     $party = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -105,7 +107,7 @@ it('can be soft deleted', function () {
 it('has consents relationship', function () {
     $party = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -124,7 +126,7 @@ it('has consents relationship', function () {
 it('has dncRules relationship', function () {
     $party = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 

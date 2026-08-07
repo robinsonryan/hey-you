@@ -19,7 +19,7 @@ beforeEach(function () {
 it('resolves contact points for a party', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -48,7 +48,7 @@ it('resolves contact points for a party', function () {
 it('filters contact points by channel', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -81,7 +81,7 @@ it('filters contact points by channel', function () {
 it('excludes contact points with blocked status', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -107,7 +107,7 @@ it('excludes contact points with blocked status', function () {
 it('excludes contact points blocked by DNC rules', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -140,7 +140,7 @@ it('excludes contact points blocked by DNC rules', function () {
 it('requires verification when constraint is set', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -177,7 +177,7 @@ it('requires verification when constraint is set', function () {
 it('requires consent when constraint is set', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -222,7 +222,7 @@ it('requires consent when constraint is set', function () {
 it('excludes specified contact point ids', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -258,7 +258,7 @@ it('excludes specified contact point ids', function () {
 it('respects limit parameter', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -286,13 +286,13 @@ it('respects limit parameter', function () {
 it('finds contacts via role assignments', function () {
     $org = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 
     $person = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'AP Contact',
     ]);
 
@@ -332,7 +332,7 @@ it('finds contacts via role assignments', function () {
 it('returns explanation with resolution details', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 

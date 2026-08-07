@@ -26,6 +26,7 @@ use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 final class ContactPointPurpose extends Model
 {
     use ConfiguresIdentifiers;
+
     protected static function booted(): void
     {
         self::created(function (ContactPointPurpose $purpose) {

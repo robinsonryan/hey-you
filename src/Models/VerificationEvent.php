@@ -26,6 +26,7 @@ use RobinsonRyan\HeyYou\Traits\ConfiguresIdentifiers;
 final class VerificationEvent extends Model
 {
     use ConfiguresIdentifiers;
+
     public const STATUS_PENDING = 'pending';
 
     public const STATUS_VERIFIED = 'verified';

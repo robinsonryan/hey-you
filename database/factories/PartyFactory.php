@@ -6,6 +6,7 @@ namespace RobinsonRyan\HeyYou\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use RobinsonRyan\HeyYou\Models\Party;
+use RobinsonRyan\HeyYou\Support\Uuid7Generator;
 
 /**
  * @extends Factory<Party>
@@ -21,7 +22,9 @@ final class PartyFactory extends Factory
     {
         return [
             'partyable_type' => 'App\\Models\\User',
-            'partyable_id' => $this->faker->unique()->numberBetween(1, 100000),
+            // Consumer models carry UUID7 keys, so a stand-in partyable_id must be
+            // a UUID — an integer is not a valid value for a consumer key column.
+            'partyable_id' => (new Uuid7Generator)->generate(),
             'display_name_cached' => $this->faker->name(),
             'metadata' => null,
         ];

@@ -7,7 +7,7 @@ namespace RobinsonRyan\HeyYou\Resolver;
 final class ResolverConstraints
 {
     /**
-     * @param  list<int>  $excludeContactPointIds
+     * @param  list<string>  $excludeContactPointIds
      */
     public function __construct(
         public readonly bool $requireVerified = false,

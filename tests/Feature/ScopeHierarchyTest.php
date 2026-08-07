@@ -20,13 +20,13 @@ beforeEach(function () {
 it('resolves scope hierarchy from location to organization', function () {
     $org = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 
     $location = Party::create([
         'partyable_type' => 'Location',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Warehouse A',
     ]);
 
@@ -46,19 +46,19 @@ it('resolves scope hierarchy from location to organization', function () {
 it('resolves scope hierarchy through parent organizations', function () {
     $parentOrg = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Parent Corp',
     ]);
 
     $childOrg = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 2,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Subsidiary Inc',
     ]);
 
     $location = Party::create([
         'partyable_type' => 'Location',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Branch Office',
     ]);
 
@@ -85,13 +85,13 @@ it('resolves scope hierarchy through parent organizations', function () {
 it('falls back up scope hierarchy when no contacts at lower scope', function () {
     $org = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 
     $location = Party::create([
         'partyable_type' => 'Location',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Warehouse A',
     ]);
 
@@ -104,7 +104,7 @@ it('falls back up scope hierarchy when no contacts at lower scope', function () 
     // Create contact point at org level, not location
     $person = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'AP Contact',
     ]);
 
@@ -143,13 +143,13 @@ it('falls back up scope hierarchy when no contacts at lower scope', function () 
 it('prefers contacts at lower scope over higher scope', function () {
     $org = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 
     $location = Party::create([
         'partyable_type' => 'Location',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Warehouse A',
     ]);
 
@@ -162,7 +162,7 @@ it('prefers contacts at lower scope over higher scope', function () {
     // Create contact at org level
     $orgPerson = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Corp AP',
     ]);
 
@@ -187,7 +187,7 @@ it('prefers contacts at lower scope over higher scope', function () {
     // Create contact at location level
     $locationPerson = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 2,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Location AP',
     ]);
 
@@ -226,13 +226,13 @@ it('prefers contacts at lower scope over higher scope', function () {
 it('stops fallback when allowFallback is false', function () {
     $org = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 
     $location = Party::create([
         'partyable_type' => 'Location',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Warehouse A',
     ]);
 
@@ -245,7 +245,7 @@ it('stops fallback when allowFallback is false', function () {
     // Create contact point at org level only
     $person = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'AP Contact',
     ]);
 
@@ -283,13 +283,13 @@ it('stops fallback when allowFallback is false', function () {
 it('ignores expired relationships in scope hierarchy', function () {
     $org = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 
     $location = Party::create([
         'partyable_type' => 'Location',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Warehouse A',
     ]);
 
@@ -311,13 +311,13 @@ it('ignores expired relationships in scope hierarchy', function () {
 it('includes fallback path in explanation', function () {
     $org = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 
     $location = Party::create([
         'partyable_type' => 'Location',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Warehouse A',
     ]);
 
@@ -351,7 +351,7 @@ it('includes fallback path in explanation', function () {
 it('finds shared contact points owned by scope party', function () {
     $org = Party::create([
         'partyable_type' => 'Company',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 

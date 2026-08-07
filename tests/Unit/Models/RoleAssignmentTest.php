@@ -11,13 +11,13 @@ use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 beforeEach(function () {
     $this->personParty = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
     $this->orgParty = Party::create([
         'partyable_type' => Company::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 });
@@ -172,7 +172,7 @@ it('can find role holders for a scope and role', function () {
 
     $person2Party = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 2,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Jane Smith',
     ]);
 

@@ -10,13 +10,13 @@ use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 beforeEach(function () {
     $this->party1 = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
     $this->party2 = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 2,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'Acme Corp',
     ]);
 });

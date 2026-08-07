@@ -12,7 +12,7 @@ use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 beforeEach(function () {
     $this->party = Party::create([
         'partyable_type' => User::class,
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 });

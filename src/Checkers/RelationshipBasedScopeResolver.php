@@ -56,7 +56,7 @@ final class RelationshipBasedScopeResolver implements ScopeHierarchyResolver
     /**
      * Find the parent scope for a given party by traversing relationships.
      *
-     * @param  list<int>  $visitedIds
+     * @param  list<string>  $visitedIds
      */
     private function findParentScope(Party $party, array $visitedIds): ?Party
     {
@@ -76,6 +76,8 @@ final class RelationshipBasedScopeResolver implements ScopeHierarchyResolver
     /**
      * Get SQL for ordering relationship types by priority.
      * location_of is most specific, then member_of, then parent_of.
+     *
+     * @return literal-string
      */
     private function getRelationshipTypePriorityOrder(): string
     {

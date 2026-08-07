@@ -16,7 +16,7 @@ beforeEach(function () {
 it('ranks active status higher than inactive', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -54,7 +54,7 @@ it('ranks active status higher than inactive', function () {
 it('ranks verified higher than unverified', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -95,7 +95,7 @@ it('ranks verified higher than unverified', function () {
 it('ranks primary higher than non-primary', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -135,7 +135,7 @@ it('ranks primary higher than non-primary', function () {
 it('ranks exact purpose match higher than no purpose', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -179,7 +179,7 @@ it('ranks exact purpose match higher than no purpose', function () {
 it('ranks exact purpose match higher than parent purpose match', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -232,7 +232,7 @@ it('ranks exact purpose match higher than parent purpose match', function () {
 it('uses purpose priority as tiebreaker', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -282,7 +282,7 @@ it('uses purpose priority as tiebreaker', function () {
 it('uses created_at as final tiebreaker (older first)', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -320,7 +320,7 @@ it('uses created_at as final tiebreaker (older first)', function () {
 it('ranks status in correct order: active > inactive > bounced > unreachable', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 
@@ -377,7 +377,7 @@ it('ranks status in correct order: active > inactive > bounced > unreachable', f
 it('includes correct flags in match result', function () {
     $party = Party::create([
         'partyable_type' => 'User',
-        'partyable_id' => 1,
+        'partyable_id' => fakePartyableId(),
         'display_name_cached' => 'John Doe',
     ]);
 

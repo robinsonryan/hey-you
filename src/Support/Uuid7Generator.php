@@ -11,7 +11,7 @@ use RobinsonRyan\HeyYou\Contracts\IdentifierGenerator;
 
 final class Uuid7Generator implements IdentifierGenerator
 {
-    public function generate(): string|int
+    public function generate(): string
     {
         return Str::uuid7()->toString();
     }

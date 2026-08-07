@@ -18,14 +18,14 @@ trait Contactable
     public static function bootContactable(): void
     {
         static::created(function (Model $model) {
-            /** @var Model&Contactable $model */
+            /** @var static $model */
             $model->party()->create([
                 'display_name_cached' => $model->getDisplayNameForParty(),
             ]);
         });
 
         static::updated(function (Model $model) {
-            /** @var Model&Contactable $model */
+            /** @var static $model */
             $party = $model->party;
             if ($party !== null) {
                 $newDisplayName = $model->getDisplayNameForParty();
@@ -36,7 +36,7 @@ trait Contactable
         });
 
         static::deleted(function (Model $model) {
-            /** @var Model&Contactable $model */
+            /** @var static $model */
             $party = $model->party;
             if ($party !== null) {
                 $party->delete();
