@@ -116,10 +116,14 @@ composer quality
 ### DDEV Commands
 
 ```bash
-ddev start           # Start environment
+ddev start           # Start environment (also creates the `testing` database)
 ddev test            # Run tests
-ddev quality         # Full quality checks
+ddev quality         # Full quality checks (Pint --test, PHPStan level 8, Pest)
 ```
+
+`ddev start`'s post-start hook creates the `testing` Postgres database the suite
+needs. Rector is deliberately **not** in `composer quality` — run
+`composer refactor:check` separately.
 
 ## Architecture
 
