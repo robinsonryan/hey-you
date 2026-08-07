@@ -20,8 +20,8 @@ use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
  * application. These tests demonstrate that contact data properly flows through
  * consumer models, ensuring tenant isolation is maintained at the application layer.
  */
-describe('Multi-Tenant Scenarios', function () {
-    it('isolates contact data between separate organizations', function () {
+describe('Multi-Tenant Scenarios', function (): void {
+    it('isolates contact data between separate organizations', function (): void {
         // Simulate two tenants as separate companies
         $tenantA = Company::create(['legal_name' => 'Tenant A Corp']);
         $tenantB = Company::create(['legal_name' => 'Tenant B Inc']);
@@ -111,7 +111,7 @@ describe('Multi-Tenant Scenarios', function () {
         expect($resultB->best()->contactPoint->value_normalized)->toBe('charlie@tenantb.com');
     });
 
-    it('allows an employee to have roles in multiple organizations', function () {
+    it('allows an employee to have roles in multiple organizations', function (): void {
         // Create two separate organizations
         $companyA = Company::create(['legal_name' => 'Company A']);
         $companyB = Company::create(['legal_name' => 'Company B']);
@@ -184,7 +184,7 @@ describe('Multi-Tenant Scenarios', function () {
         expect($resultB->best()->owningParty->id)->toBe($consultant->party->id);
     });
 
-    it('handles organization-specific DNC rules without affecting other orgs', function () {
+    it('handles organization-specific DNC rules without affecting other orgs', function (): void {
         $companyA = Company::create(['legal_name' => 'Company A']);
         $companyB = Company::create(['legal_name' => 'Company B']);
 
@@ -247,7 +247,7 @@ describe('Multi-Tenant Scenarios', function () {
         expect($resultBSales->matches)->not->toBeEmpty();
     });
 
-    it('supports multiple locations per organization with separate contacts', function () {
+    it('supports multiple locations per organization with separate contacts', function (): void {
         // Create parent organization
         $parentOrg = Company::create(['legal_name' => 'National Corp']);
 
@@ -330,7 +330,7 @@ describe('Multi-Tenant Scenarios', function () {
         expect($resultWest->best()->contactPoint->value_normalized)->toBe('receiving.west@national.com');
     });
 
-    it('allows each organization to have separate addresses', function () {
+    it('allows each organization to have separate addresses', function (): void {
         $companyA = Company::create(['legal_name' => 'Company A']);
         $companyB = Company::create(['legal_name' => 'Company B']);
 
@@ -374,7 +374,7 @@ describe('Multi-Tenant Scenarios', function () {
         expect($addressesB->pluck('city')->unique()->toArray())->toBe(['Beta City']);
     });
 
-    it('tracks consent separately for each party regardless of organization', function () {
+    it('tracks consent separately for each party regardless of organization', function (): void {
         // Create multiple users across organizations
         $userA = User::create(['name' => 'User A', 'email' => 'usera@example.com']);
         $userB = User::create(['name' => 'User B', 'email' => 'userb@example.com']);
@@ -414,8 +414,8 @@ describe('Multi-Tenant Scenarios', function () {
     });
 });
 
-describe('Data Integrity in Multi-Tenant Context', function () {
-    it('maintains referential integrity when parties are deleted', function () {
+describe('Data Integrity in Multi-Tenant Context', function (): void {
+    it('maintains referential integrity when parties are deleted', function (): void {
         $company = Company::create(['legal_name' => 'Test Corp']);
         $employee = User::create(['name' => 'Test Employee', 'email' => 'emp@example.com']);
 
@@ -460,7 +460,7 @@ describe('Data Integrity in Multi-Tenant Context', function () {
         expect($relationships)->toHaveCount(1);
     });
 
-    it('supports querying across organization boundaries when needed', function () {
+    it('supports querying across organization boundaries when needed', function (): void {
         // Create multiple organizations and their contacts
         $orgs = collect();
         for ($i = 1; $i <= 3; $i++) {

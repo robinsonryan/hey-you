@@ -7,7 +7,7 @@ use RobinsonRyan\HeyYou\Models\ContactPointPurpose;
 use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $party = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -21,13 +21,13 @@ beforeEach(function () {
     ]);
 });
 
-it('uses the prefixed table name', function () {
+it('uses the prefixed table name', function (): void {
     $purpose = new ContactPointPurpose;
 
     expect($purpose->getTable())->toBe('heyyou_contact_point_purposes');
 });
 
-it('has fillable attributes', function () {
+it('has fillable attributes', function (): void {
     $purpose = ContactPointPurpose::create([
         'contact_point_id' => $this->contactPoint->id,
         'purpose' => 'billing',
@@ -40,7 +40,7 @@ it('has fillable attributes', function () {
     expect($purpose->is_preferred)->toBeTrue();
 });
 
-it('belongs to contact point', function () {
+it('belongs to contact point', function (): void {
     $purpose = ContactPointPurpose::create([
         'contact_point_id' => $this->contactPoint->id,
         'purpose' => 'billing',
@@ -49,7 +49,7 @@ it('belongs to contact point', function () {
     expect($purpose->contactPoint->id)->toBe($this->contactPoint->id);
 });
 
-it('defaults priority to 0', function () {
+it('defaults priority to 0', function (): void {
     $purpose = ContactPointPurpose::create([
         'contact_point_id' => $this->contactPoint->id,
         'purpose' => 'billing',
@@ -58,7 +58,7 @@ it('defaults priority to 0', function () {
     expect($purpose->priority)->toBe(0);
 });
 
-it('defaults is_preferred to false', function () {
+it('defaults is_preferred to false', function (): void {
     $purpose = ContactPointPurpose::create([
         'contact_point_id' => $this->contactPoint->id,
         'purpose' => 'billing',
@@ -67,7 +67,7 @@ it('defaults is_preferred to false', function () {
     expect($purpose->is_preferred)->toBeFalse();
 });
 
-it('enforces unique constraint on contact point and purpose', function () {
+it('enforces unique constraint on contact point and purpose', function (): void {
     ContactPointPurpose::create([
         'contact_point_id' => $this->contactPoint->id,
         'purpose' => 'billing',
@@ -79,7 +79,7 @@ it('enforces unique constraint on contact point and purpose', function () {
     ]);
 })->throws(Illuminate\Database\QueryException::class);
 
-it('allows multiple purposes per contact point', function () {
+it('allows multiple purposes per contact point', function (): void {
     ContactPointPurpose::create([
         'contact_point_id' => $this->contactPoint->id,
         'purpose' => 'billing',

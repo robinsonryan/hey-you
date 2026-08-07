@@ -66,7 +66,7 @@ final class ContactPointConsent extends Model
 
     protected static function booted(): void
     {
-        self::created(function (ContactPointConsent $consent) {
+        self::created(function (ContactPointConsent $consent): void {
             $event = $consent->status === self::STATUS_OPTED_IN
                 ? new ConsentGranted($consent, 'contact_point', $consent->purpose_category, null)
                 : new ConsentRevoked($consent, 'contact_point', $consent->purpose_category, null);
@@ -74,7 +74,7 @@ final class ContactPointConsent extends Model
             app(EventDispatcher::class)->dispatch($event);
         });
 
-        self::updated(function (ContactPointConsent $consent) {
+        self::updated(function (ContactPointConsent $consent): void {
             if ($consent->wasChanged('status')) {
                 $event = $consent->status === self::STATUS_OPTED_IN
                     ? new ConsentGranted($consent, 'contact_point', $consent->purpose_category, null)

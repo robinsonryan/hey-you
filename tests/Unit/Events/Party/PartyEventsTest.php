@@ -10,13 +10,13 @@ use RobinsonRyan\HeyYou\Events\Party\PartyUpdated;
 use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
     $this->party = $this->user->party;
 });
 
-describe('PartyCreated', function () {
-    it('contains the party and partyable', function () {
+describe('PartyCreated', function (): void {
+    it('contains the party and partyable', function (): void {
         $event = new PartyCreated($this->party, $this->user);
 
         expect($event->party)->toBeInstanceOf(Party::class)
@@ -25,8 +25,8 @@ describe('PartyCreated', function () {
     });
 });
 
-describe('PartyUpdated', function () {
-    it('contains the party, partyable, and changed attributes', function () {
+describe('PartyUpdated', function (): void {
+    it('contains the party, partyable, and changed attributes', function (): void {
         $changedAttributes = ['display_name_cached' => 'Jane Doe'];
         $event = new PartyUpdated($this->party, $this->user, $changedAttributes);
 
@@ -36,8 +36,8 @@ describe('PartyUpdated', function () {
     });
 });
 
-describe('PartyDeleted', function () {
-    it('contains the party and partyable', function () {
+describe('PartyDeleted', function (): void {
+    it('contains the party and partyable', function (): void {
         $event = new PartyDeleted($this->party, $this->user);
 
         expect($event->party)->toBeInstanceOf(Party::class)
@@ -45,8 +45,8 @@ describe('PartyDeleted', function () {
     });
 });
 
-describe('PartyRestored', function () {
-    it('contains the party and partyable', function () {
+describe('PartyRestored', function (): void {
+    it('contains the party and partyable', function (): void {
         $event = new PartyRestored($this->party, $this->user);
 
         expect($event->party)->toBeInstanceOf(Party::class)

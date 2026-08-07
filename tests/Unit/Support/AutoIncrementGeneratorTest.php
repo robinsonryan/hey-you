@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\ColumnDefinition;
 use RobinsonRyan\HeyYou\Support\AutoIncrementGenerator;
 
-it('creates id column definition', function () {
+it('creates id column definition', function (): void {
     $generator = new AutoIncrementGenerator;
 
     $blueprint = Mockery::mock(Blueprint::class);
@@ -20,7 +20,7 @@ it('creates id column definition', function () {
     $generator->columnDefinition($blueprint, 'id');
 });
 
-it('returns zero for generate since database handles auto-increment', function () {
+it('returns zero for generate since database handles auto-increment', function (): void {
     $generator = new AutoIncrementGenerator;
 
     expect($generator->generate())->toBe(0);

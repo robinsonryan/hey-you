@@ -78,16 +78,16 @@ final class Party extends Model
 
     protected static function booted(): void
     {
-        self::created(function (Party $party) {
+        self::created(function (Party $party): void {
             $partyable = self::safeLoadPartyable($party);
-            if ($partyable !== null) {
+            if ($partyable instanceof Model) {
                 app(EventDispatcher::class)->dispatch(new PartyCreated($party, $partyable));
             }
         });
 
-        self::updated(function (Party $party) {
+        self::updated(function (Party $party): void {
             $partyable = self::safeLoadPartyable($party);
-            if ($partyable !== null) {
+            if ($partyable instanceof Model) {
                 app(EventDispatcher::class)->dispatch(new PartyUpdated(
                     $party,
                     $partyable,
@@ -96,16 +96,16 @@ final class Party extends Model
             }
         });
 
-        self::deleted(function (Party $party) {
+        self::deleted(function (Party $party): void {
             $partyable = self::safeLoadPartyable($party);
-            if ($partyable !== null) {
+            if ($partyable instanceof Model) {
                 app(EventDispatcher::class)->dispatch(new PartyDeleted($party, $partyable));
             }
         });
 
-        self::restored(function (Party $party) {
+        self::restored(function (Party $party): void {
             $partyable = self::safeLoadPartyable($party);
-            if ($partyable !== null) {
+            if ($partyable instanceof Model) {
                 app(EventDispatcher::class)->dispatch(new PartyRestored($party, $partyable));
             }
         });

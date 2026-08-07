@@ -13,14 +13,14 @@ return new class extends Migration
     {
         // Fixture consumer tables follow the package's UUID7 convention: the
         // database generates the key via PostgreSQL's native uuidv7().
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table): void {
             $table->uuid('id')->primary()->default(DB::raw('uuidv7()'));
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamps();
         });
 
-        Schema::create('companies', function (Blueprint $table) {
+        Schema::create('companies', function (Blueprint $table): void {
             $table->uuid('id')->primary()->default(DB::raw('uuidv7()'));
             $table->string('legal_name');
             $table->timestamps();

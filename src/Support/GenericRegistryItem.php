@@ -6,15 +6,15 @@ namespace RobinsonRyan\HeyYou\Support;
 
 use RobinsonRyan\HeyYou\Contracts\Registries\RegistryItem;
 
-final class GenericRegistryItem implements RegistryItem
+final readonly class GenericRegistryItem implements RegistryItem
 {
     /**
      * @param  array<string, mixed>  $metadata
      */
     public function __construct(
-        private readonly string $slug,
-        private readonly string $name,
-        private readonly array $metadata = [],
+        private string $slug,
+        private string $name,
+        private array $metadata = [],
     ) {}
 
     public function slug(): string

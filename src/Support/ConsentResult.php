@@ -6,13 +6,13 @@ namespace RobinsonRyan\HeyYou\Support;
 
 use Illuminate\Support\Carbon;
 
-final class ConsentResult
+final readonly class ConsentResult
 {
     public function __construct(
-        public readonly bool $allowed,
-        public readonly string $level,
-        public readonly ?string $status = null,
-        public readonly ?Carbon $capturedAt = null,
+        public bool $allowed,
+        public string $level,
+        public ?string $status = null,
+        public ?Carbon $capturedAt = null,
     ) {}
 
     public static function allowed(string $level, string $status, Carbon $capturedAt): self
@@ -40,8 +40,6 @@ final class ConsentResult
         return new self(
             allowed: true,
             level: 'none',
-            status: null,
-            capturedAt: null,
         );
     }
 }

@@ -17,14 +17,14 @@ final class DefaultConsentChecker implements ConsentChecker
         // Check contact point level first (most specific)
         $contactPointConsent = $this->getContactPointConsent($contactPoint, $purposeCategory);
 
-        if ($contactPointConsent !== null) {
+        if ($contactPointConsent instanceof ContactPointConsent) {
             return $this->buildResult($contactPointConsent, 'contact_point');
         }
 
         // Check party level (channel-specific first, then generic)
         $partyConsent = $this->getPartyConsent($contactPoint, $purposeCategory);
 
-        if ($partyConsent !== null) {
+        if ($partyConsent instanceof PartyConsent) {
             return $this->buildResult($partyConsent, 'party');
         }
 

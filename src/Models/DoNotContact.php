@@ -74,7 +74,7 @@ final class DoNotContact extends Model
 
     protected static function booted(): void
     {
-        self::created(function (DoNotContact $dnc) {
+        self::created(function (DoNotContact $dnc): void {
             app(EventDispatcher::class)->dispatch(new DncRuleCreated(
                 $dnc,
                 $dnc->party,
@@ -82,7 +82,7 @@ final class DoNotContact extends Model
             ));
         });
 
-        self::deleted(function (DoNotContact $dnc) {
+        self::deleted(function (DoNotContact $dnc): void {
             app(EventDispatcher::class)->dispatch(new DncRuleRemoved(
                 $dnc,
                 $dnc->party,
@@ -151,7 +151,7 @@ final class DoNotContact extends Model
 
         return $query
             ->where('effective_at', '<=', $now)
-            ->where(function (Builder $q) use ($now) {
+            ->where(function (Builder $q) use ($now): void {
                 $q->whereNull('expires_at')
                     ->orWhere('expires_at', '>', $now);
             });

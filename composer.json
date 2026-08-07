@@ -61,6 +61,7 @@
         "quality": [
             "@lint:check",
             "@analyze",
+            "@refactor:check",
             "@test"
         ]
     }

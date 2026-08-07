@@ -117,7 +117,7 @@ final class ContactPoint extends Model
 
     protected static function booted(): void
     {
-        self::saving(function (ContactPoint $contactPoint) {
+        self::saving(function (ContactPoint $contactPoint): void {
             // getAttribute() rather than the property: on an unsaved model the
             // (non-nullable) normalized value has not been derived yet.
             if ($contactPoint->isDirty('value_raw') || $contactPoint->getAttribute('value_normalized') === null) {
@@ -126,14 +126,14 @@ final class ContactPoint extends Model
             }
         });
 
-        self::created(function (ContactPoint $contactPoint) {
+        self::created(function (ContactPoint $contactPoint): void {
             app(EventDispatcher::class)->dispatch(new ContactPointCreated(
                 $contactPoint,
                 $contactPoint->party,
             ));
         });
 
-        self::updated(function (ContactPoint $contactPoint) {
+        self::updated(function (ContactPoint $contactPoint): void {
             // Check if verification status changed to verified
             if ($contactPoint->wasChanged('is_verified') && $contactPoint->is_verified) {
                 app(EventDispatcher::class)->dispatch(new ContactPointVerified(
@@ -166,14 +166,14 @@ final class ContactPoint extends Model
             ));
         });
 
-        self::deleted(function (ContactPoint $contactPoint) {
+        self::deleted(function (ContactPoint $contactPoint): void {
             app(EventDispatcher::class)->dispatch(new ContactPointDeleted(
                 $contactPoint,
                 $contactPoint->party,
             ));
         });
 
-        self::restored(function (ContactPoint $contactPoint) {
+        self::restored(function (ContactPoint $contactPoint): void {
             app(EventDispatcher::class)->dispatch(new ContactPointRestored(
                 $contactPoint,
                 $contactPoint->party,

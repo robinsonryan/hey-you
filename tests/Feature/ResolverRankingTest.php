@@ -9,11 +9,11 @@ use RobinsonRyan\HeyYou\Models\ContactPointPurpose;
 use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Resolver\ResolverRequest;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->resolver = app(ContactResolver::class);
 });
 
-it('ranks active status higher than inactive', function () {
+it('ranks active status higher than inactive', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -51,7 +51,7 @@ it('ranks active status higher than inactive', function () {
         ->and($result->matches[1]->contactPoint->id)->toBe($inactive->id);
 });
 
-it('ranks verified higher than unverified', function () {
+it('ranks verified higher than unverified', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -92,7 +92,7 @@ it('ranks verified higher than unverified', function () {
         ->and($result->matches[1]->contactPoint->id)->toBe($unverified->id);
 });
 
-it('ranks primary higher than non-primary', function () {
+it('ranks primary higher than non-primary', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -132,7 +132,7 @@ it('ranks primary higher than non-primary', function () {
         ->and($result->matches[1]->contactPoint->id)->toBe($nonPrimary->id);
 });
 
-it('ranks exact purpose match higher than no purpose', function () {
+it('ranks exact purpose match higher than no purpose', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -176,7 +176,7 @@ it('ranks exact purpose match higher than no purpose', function () {
         ->and($result->matches[1]->contactPoint->id)->toBe($noPurpose->id);
 });
 
-it('ranks exact purpose match higher than parent purpose match', function () {
+it('ranks exact purpose match higher than parent purpose match', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -229,7 +229,7 @@ it('ranks exact purpose match higher than parent purpose match', function () {
         ->and($result->matches[1]->matchedPurpose)->toBe('billing');
 });
 
-it('uses purpose priority as tiebreaker', function () {
+it('uses purpose priority as tiebreaker', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -279,7 +279,7 @@ it('uses purpose priority as tiebreaker', function () {
         ->and($result->matches[1]->contactPoint->id)->toBe($lowPriority->id);
 });
 
-it('uses created_at as final tiebreaker (older first)', function () {
+it('uses created_at as final tiebreaker (older first)', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -317,7 +317,7 @@ it('uses created_at as final tiebreaker (older first)', function () {
         ->and($result->matches[1]->contactPoint->id)->toBe($newer->id);
 });
 
-it('ranks status in correct order: active > inactive > bounced > unreachable', function () {
+it('ranks status in correct order: active > inactive > bounced > unreachable', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -374,7 +374,7 @@ it('ranks status in correct order: active > inactive > bounced > unreachable', f
         ->and($result->matches[3]->contactPoint->status)->toBe(ContactPoint::STATUS_UNREACHABLE);
 });
 
-it('includes correct flags in match result', function () {
+it('includes correct flags in match result', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),

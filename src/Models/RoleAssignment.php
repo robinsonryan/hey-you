@@ -50,7 +50,7 @@ final class RoleAssignment extends Model
 
     protected static function booted(): void
     {
-        self::created(function (RoleAssignment $roleAssignment) {
+        self::created(function (RoleAssignment $roleAssignment): void {
             app(EventDispatcher::class)->dispatch(new RoleAssignmentCreated(
                 $roleAssignment,
                 $roleAssignment->party,
@@ -58,7 +58,7 @@ final class RoleAssignment extends Model
             ));
         });
 
-        self::updated(function (RoleAssignment $roleAssignment) {
+        self::updated(function (RoleAssignment $roleAssignment): void {
             $changes = $roleAssignment->getChanges();
 
             app(EventDispatcher::class)->dispatch(new RoleAssignmentUpdated(
@@ -72,7 +72,7 @@ final class RoleAssignment extends Model
             }
         });
 
-        self::deleted(function (RoleAssignment $roleAssignment) {
+        self::deleted(function (RoleAssignment $roleAssignment): void {
             app(EventDispatcher::class)->dispatch(new RoleAssignmentDeleted($roleAssignment));
         });
     }
@@ -142,11 +142,11 @@ final class RoleAssignment extends Model
         $now = Carbon::now();
 
         return $query
-            ->where(function (Builder $q) use ($now) {
+            ->where(function (Builder $q) use ($now): void {
                 $q->whereNull('valid_from')
                     ->orWhere('valid_from', '<=', $now);
             })
-            ->where(function (Builder $q) use ($now) {
+            ->where(function (Builder $q) use ($now): void {
                 $q->whereNull('valid_to')
                     ->orWhere('valid_to', '>=', $now);
             });

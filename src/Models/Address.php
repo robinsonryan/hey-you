@@ -61,11 +61,11 @@ final class Address extends Model
 
     protected static function booted(): void
     {
-        self::created(function (Address $address) {
+        self::created(function (Address $address): void {
             app(EventDispatcher::class)->dispatch(new AddressCreated($address, $address->party));
         });
 
-        self::updated(function (Address $address) {
+        self::updated(function (Address $address): void {
             $changes = $address->getChanges();
 
             // Check for validation_status changes
@@ -90,11 +90,11 @@ final class Address extends Model
             ));
         });
 
-        self::deleted(function (Address $address) {
+        self::deleted(function (Address $address): void {
             app(EventDispatcher::class)->dispatch(new AddressDeleted($address, $address->party));
         });
 
-        self::restored(function (Address $address) {
+        self::restored(function (Address $address): void {
             app(EventDispatcher::class)->dispatch(new AddressRestored($address, $address->party));
         });
     }
@@ -174,11 +174,11 @@ final class Address extends Model
         $now = Carbon::now();
 
         return $query
-            ->where(function (Builder $q) use ($now) {
+            ->where(function (Builder $q) use ($now): void {
                 $q->whereNull('valid_from')
                     ->orWhere('valid_from', '<=', $now);
             })
-            ->where(function (Builder $q) use ($now) {
+            ->where(function (Builder $q) use ($now): void {
                 $q->whereNull('valid_to')
                     ->orWhere('valid_to', '>=', $now);
             });

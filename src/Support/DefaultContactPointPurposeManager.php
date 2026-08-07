@@ -42,7 +42,7 @@ final class DefaultContactPointPurposeManager implements ContactPointPurposeMana
      */
     public function forPurpose(string $purpose): Builder
     {
-        return ContactPoint::whereHas('purposes', function (Builder $query) use ($purpose) {
+        return ContactPoint::whereHas('purposes', function (Builder $query) use ($purpose): void {
             $query->where('purpose', $purpose);
         });
     }

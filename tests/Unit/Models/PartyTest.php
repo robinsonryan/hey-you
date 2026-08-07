@@ -9,13 +9,13 @@ use RobinsonRyan\HeyYou\Models\PartyConsent;
 use RobinsonRyan\HeyYou\Models\PartyRelationship;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-it('uses the prefixed table name', function () {
+it('uses the prefixed table name', function (): void {
     $party = new Party;
 
     expect($party->getTable())->toBe('heyyou_parties');
 });
 
-it('has fillable attributes', function () {
+it('has fillable attributes', function (): void {
     $partyableId = fakePartyableId();
 
     $party = Party::create([
@@ -31,7 +31,7 @@ it('has fillable attributes', function () {
     expect($party->metadata)->toBe(['timezone' => 'America/New_York']);
 });
 
-it('casts metadata to array', function () {
+it('casts metadata to array', function (): void {
     $party = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -45,7 +45,7 @@ it('casts metadata to array', function () {
     expect($party->metadata['key'])->toBe('value');
 });
 
-it('has outgoing relationships', function () {
+it('has outgoing relationships', function (): void {
     $party1 = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -68,7 +68,7 @@ it('has outgoing relationships', function () {
     expect($party1->outgoingRelationships->first()->relationship_type)->toBe('employment');
 });
 
-it('has incoming relationships', function () {
+it('has incoming relationships', function (): void {
     $party1 = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -91,7 +91,7 @@ it('has incoming relationships', function () {
     expect($party2->incomingRelationships->first()->relationship_type)->toBe('employment');
 });
 
-it('can be soft deleted', function () {
+it('can be soft deleted', function (): void {
     $party = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -104,7 +104,7 @@ it('can be soft deleted', function () {
     expect(Party::withTrashed()->find($party->id))->not->toBeNull();
 });
 
-it('has consents relationship', function () {
+it('has consents relationship', function (): void {
     $party = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -123,7 +123,7 @@ it('has consents relationship', function () {
     expect($party->consents->first()->purpose_category)->toBe('marketing');
 });
 
-it('has dncRules relationship', function () {
+it('has dncRules relationship', function (): void {
     $party = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),

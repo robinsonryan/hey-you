@@ -39,7 +39,7 @@ final class PartyRelationship extends Model
 
     protected static function booted(): void
     {
-        self::created(function (PartyRelationship $relationship) {
+        self::created(function (PartyRelationship $relationship): void {
             app(EventDispatcher::class)->dispatch(new RelationshipCreated(
                 $relationship,
                 $relationship->fromParty,
@@ -47,7 +47,7 @@ final class PartyRelationship extends Model
             ));
         });
 
-        self::updated(function (PartyRelationship $relationship) {
+        self::updated(function (PartyRelationship $relationship): void {
             $changes = $relationship->getChanges();
 
             app(EventDispatcher::class)->dispatch(new RelationshipUpdated(
@@ -61,7 +61,7 @@ final class PartyRelationship extends Model
             }
         });
 
-        self::deleted(function (PartyRelationship $relationship) {
+        self::deleted(function (PartyRelationship $relationship): void {
             app(EventDispatcher::class)->dispatch(new RelationshipDeleted($relationship));
         });
     }
@@ -123,11 +123,11 @@ final class PartyRelationship extends Model
         $now = Carbon::now();
 
         return $query
-            ->where(function (Builder $q) use ($now) {
+            ->where(function (Builder $q) use ($now): void {
                 $q->whereNull('valid_from')
                     ->orWhere('valid_from', '<=', $now);
             })
-            ->where(function (Builder $q) use ($now) {
+            ->where(function (Builder $q) use ($now): void {
                 $q->whereNull('valid_to')
                     ->orWhere('valid_to', '>=', $now);
             });

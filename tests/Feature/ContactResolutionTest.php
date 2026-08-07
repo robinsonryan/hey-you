@@ -12,11 +12,11 @@ use RobinsonRyan\HeyYou\Models\RoleAssignment;
 use RobinsonRyan\HeyYou\Resolver\ResolverConstraints;
 use RobinsonRyan\HeyYou\Resolver\ResolverRequest;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->resolver = app(ContactResolver::class);
 });
 
-it('resolves contact points for a party', function () {
+it('resolves contact points for a party', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -45,7 +45,7 @@ it('resolves contact points for a party', function () {
         ->and($result->best()->normalizedValue)->toBe('john@example.com');
 });
 
-it('filters contact points by channel', function () {
+it('filters contact points by channel', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -78,7 +78,7 @@ it('filters contact points by channel', function () {
         ->and($result->best()->channel)->toBe('phone');
 });
 
-it('excludes contact points with blocked status', function () {
+it('excludes contact points with blocked status', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -104,7 +104,7 @@ it('excludes contact points with blocked status', function () {
         ->and($result->explanation->exclusionSummary['status'] ?? 0)->toBe(1);
 });
 
-it('excludes contact points blocked by DNC rules', function () {
+it('excludes contact points blocked by DNC rules', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -137,7 +137,7 @@ it('excludes contact points blocked by DNC rules', function () {
         ->and($result->explanation->exclusionSummary['dnc'] ?? 0)->toBe(1);
 });
 
-it('requires verification when constraint is set', function () {
+it('requires verification when constraint is set', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -174,7 +174,7 @@ it('requires verification when constraint is set', function () {
         ->and($result->best()->contactPoint->id)->toBe($verifiedContactPoint->id);
 });
 
-it('requires consent when constraint is set', function () {
+it('requires consent when constraint is set', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -219,7 +219,7 @@ it('requires consent when constraint is set', function () {
         ->and($result->best()->contactPoint->id)->toBe($consentContactPoint->id);
 });
 
-it('excludes specified contact point ids', function () {
+it('excludes specified contact point ids', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -255,7 +255,7 @@ it('excludes specified contact point ids', function () {
         ->and($result->best()->contactPoint->id)->toBe($includedContactPoint->id);
 });
 
-it('respects limit parameter', function () {
+it('respects limit parameter', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -283,7 +283,7 @@ it('respects limit parameter', function () {
     expect($result->matches)->toHaveCount(3);
 });
 
-it('finds contacts via role assignments', function () {
+it('finds contacts via role assignments', function (): void {
     $org = Party::create([
         'partyable_type' => 'Company',
         'partyable_id' => fakePartyableId(),
@@ -329,7 +329,7 @@ it('finds contacts via role assignments', function () {
         ->and($result->best()->matchedRole)->toBe('accounts_payable_contact');
 });
 
-it('returns explanation with resolution details', function () {
+it('returns explanation with resolution details', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),

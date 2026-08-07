@@ -12,12 +12,12 @@ use RobinsonRyan\HeyYou\Models\RoleAssignment;
 use RobinsonRyan\HeyYou\Resolver\ResolverConstraints;
 use RobinsonRyan\HeyYou\Resolver\ResolverRequest;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->resolver = app(ContactResolver::class);
     $this->scopeResolver = app(ScopeHierarchyResolver::class);
 });
 
-it('resolves scope hierarchy from location to organization', function () {
+it('resolves scope hierarchy from location to organization', function (): void {
     $org = Party::create([
         'partyable_type' => 'Company',
         'partyable_id' => fakePartyableId(),
@@ -43,7 +43,7 @@ it('resolves scope hierarchy from location to organization', function () {
         ->and($hierarchy[1]->id)->toBe($org->id);
 });
 
-it('resolves scope hierarchy through parent organizations', function () {
+it('resolves scope hierarchy through parent organizations', function (): void {
     $parentOrg = Party::create([
         'partyable_type' => 'Company',
         'partyable_id' => fakePartyableId(),
@@ -82,7 +82,7 @@ it('resolves scope hierarchy through parent organizations', function () {
         ->and($hierarchy[2]->id)->toBe($parentOrg->id);
 });
 
-it('falls back up scope hierarchy when no contacts at lower scope', function () {
+it('falls back up scope hierarchy when no contacts at lower scope', function (): void {
     $org = Party::create([
         'partyable_type' => 'Company',
         'partyable_id' => fakePartyableId(),
@@ -140,7 +140,7 @@ it('falls back up scope hierarchy when no contacts at lower scope', function () 
         ->and($result->explanation->fallbackUsed)->toBeTrue();
 });
 
-it('prefers contacts at lower scope over higher scope', function () {
+it('prefers contacts at lower scope over higher scope', function (): void {
     $org = Party::create([
         'partyable_type' => 'Company',
         'partyable_id' => fakePartyableId(),
@@ -223,7 +223,7 @@ it('prefers contacts at lower scope over higher scope', function () {
         ->and($result->best()->scopeParty->id)->toBe($location->id);
 });
 
-it('stops fallback when allowFallback is false', function () {
+it('stops fallback when allowFallback is false', function (): void {
     $org = Party::create([
         'partyable_type' => 'Company',
         'partyable_id' => fakePartyableId(),
@@ -280,7 +280,7 @@ it('stops fallback when allowFallback is false', function () {
     expect($result->isEmpty())->toBeTrue();
 });
 
-it('ignores expired relationships in scope hierarchy', function () {
+it('ignores expired relationships in scope hierarchy', function (): void {
     $org = Party::create([
         'partyable_type' => 'Company',
         'partyable_id' => fakePartyableId(),
@@ -308,7 +308,7 @@ it('ignores expired relationships in scope hierarchy', function () {
         ->and($hierarchy[0]->id)->toBe($location->id);
 });
 
-it('includes fallback path in explanation', function () {
+it('includes fallback path in explanation', function (): void {
     $org = Party::create([
         'partyable_type' => 'Company',
         'partyable_id' => fakePartyableId(),
@@ -348,7 +348,7 @@ it('includes fallback path in explanation', function () {
         ->and($result->explanation->fallbackPath)->not->toBeNull();
 });
 
-it('finds shared contact points owned by scope party', function () {
+it('finds shared contact points owned by scope party', function (): void {
     $org = Party::create([
         'partyable_type' => 'Company',
         'partyable_id' => fakePartyableId(),

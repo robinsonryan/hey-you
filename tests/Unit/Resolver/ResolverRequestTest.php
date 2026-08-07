@@ -6,7 +6,7 @@ use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Resolver\ResolverConstraints;
 use RobinsonRyan\HeyYou\Resolver\ResolverRequest;
 
-it('creates a resolver request with required parameters', function () {
+it('creates a resolver request with required parameters', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -27,7 +27,7 @@ it('creates a resolver request with required parameters', function () {
         ->and($request->limit)->toBe(10);
 });
 
-it('defaults scope party to target party', function () {
+it('defaults scope party to target party', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -43,7 +43,7 @@ it('defaults scope party to target party', function () {
     expect($request->getEffectiveScopeParty())->toBe($party);
 });
 
-it('uses explicit scope party when provided', function () {
+it('uses explicit scope party when provided', function (): void {
     $targetParty = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -66,7 +66,7 @@ it('uses explicit scope party when provided', function () {
     expect($request->getEffectiveScopeParty())->toBe($scopeParty);
 });
 
-it('provides default constraints when none provided', function () {
+it('provides default constraints when none provided', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -87,7 +87,7 @@ it('provides default constraints when none provided', function () {
         ->and($constraints->allowFallback)->toBeTrue();
 });
 
-it('uses explicit constraints when provided', function () {
+it('uses explicit constraints when provided', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),

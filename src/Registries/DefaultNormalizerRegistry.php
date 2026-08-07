@@ -17,7 +17,7 @@ final class DefaultNormalizerRegistry implements NormalizerRegistry
      */
     private array $normalizers = [];
 
-    private ChannelNormalizer $default;
+    private readonly ChannelNormalizer $default;
 
     public function __construct()
     {

@@ -11,15 +11,15 @@ use RobinsonRyan\HeyYou\Models\PartyRelationship;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\Company;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
     $this->company = Company::create(['legal_name' => 'Acme Corp']);
     $this->fromParty = $this->user->party;
     $this->toParty = $this->company->party;
 });
 
-describe('RelationshipCreated', function () {
-    it('contains the relationship, fromParty, and toParty', function () {
+describe('RelationshipCreated', function (): void {
+    it('contains the relationship, fromParty, and toParty', function (): void {
         $relationship = PartyRelationship::create([
             'from_party_id' => $this->fromParty->id,
             'to_party_id' => $this->toParty->id,
@@ -37,8 +37,8 @@ describe('RelationshipCreated', function () {
     });
 });
 
-describe('RelationshipUpdated', function () {
-    it('contains the relationship and changed attributes', function () {
+describe('RelationshipUpdated', function (): void {
+    it('contains the relationship and changed attributes', function (): void {
         $relationship = PartyRelationship::create([
             'from_party_id' => $this->fromParty->id,
             'to_party_id' => $this->toParty->id,
@@ -52,8 +52,8 @@ describe('RelationshipUpdated', function () {
     });
 });
 
-describe('RelationshipEnded', function () {
-    it('contains the relationship when valid_to is set', function () {
+describe('RelationshipEnded', function (): void {
+    it('contains the relationship when valid_to is set', function (): void {
         $relationship = PartyRelationship::create([
             'from_party_id' => $this->fromParty->id,
             'to_party_id' => $this->toParty->id,
@@ -66,8 +66,8 @@ describe('RelationshipEnded', function () {
     });
 });
 
-describe('RelationshipDeleted', function () {
-    it('contains the relationship', function () {
+describe('RelationshipDeleted', function (): void {
+    it('contains the relationship', function (): void {
         $relationship = PartyRelationship::create([
             'from_party_id' => $this->fromParty->id,
             'to_party_id' => $this->toParty->id,

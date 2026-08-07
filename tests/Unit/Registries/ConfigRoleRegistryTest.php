@@ -6,7 +6,7 @@ use RobinsonRyan\HeyYou\Contracts\Registries\RegistryItem;
 use RobinsonRyan\HeyYou\Contracts\Registries\RoleRegistry;
 use RobinsonRyan\HeyYou\Registries\ConfigRoleRegistry;
 
-beforeEach(function () {
+beforeEach(function (): void {
     config(['heyyou.roles' => [
         'accounts_payable_contact' => ['name' => 'Accounts Payable Contact'],
         'hr_contact' => ['name' => 'HR Contact'],
@@ -14,20 +14,20 @@ beforeEach(function () {
     ]]);
 });
 
-it('implements RoleRegistry interface', function () {
+it('implements RoleRegistry interface', function (): void {
     $registry = new ConfigRoleRegistry;
 
     expect($registry)->toBeInstanceOf(RoleRegistry::class);
 });
 
-it('checks if role exists', function () {
+it('checks if role exists', function (): void {
     $registry = new ConfigRoleRegistry;
 
     expect($registry->exists('hr_contact'))->toBeTrue();
     expect($registry->exists('nonexistent'))->toBeFalse();
 });
 
-it('gets a role by slug', function () {
+it('gets a role by slug', function (): void {
     $registry = new ConfigRoleRegistry;
 
     $item = $registry->get('accounts_payable_contact');
@@ -37,13 +37,13 @@ it('gets a role by slug', function () {
     expect($item->name())->toBe('Accounts Payable Contact');
 });
 
-it('throws exception for nonexistent role', function () {
+it('throws exception for nonexistent role', function (): void {
     $registry = new ConfigRoleRegistry;
 
     $registry->get('nonexistent');
 })->throws(InvalidArgumentException::class);
 
-it('returns all roles', function () {
+it('returns all roles', function (): void {
     $registry = new ConfigRoleRegistry;
 
     $all = $registry->all();

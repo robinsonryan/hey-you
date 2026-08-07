@@ -6,7 +6,7 @@ use RobinsonRyan\HeyYou\Contracts\Registries\ChannelRegistry;
 use RobinsonRyan\HeyYou\Contracts\Registries\RegistryItem;
 use RobinsonRyan\HeyYou\Registries\ConfigChannelRegistry;
 
-beforeEach(function () {
+beforeEach(function (): void {
     config(['heyyou.channels' => [
         'email' => ['name' => 'Email', 'category' => 'electronic'],
         'phone' => ['name' => 'Phone', 'category' => 'electronic'],
@@ -16,20 +16,20 @@ beforeEach(function () {
     ]]);
 });
 
-it('implements ChannelRegistry interface', function () {
+it('implements ChannelRegistry interface', function (): void {
     $registry = new ConfigChannelRegistry;
 
     expect($registry)->toBeInstanceOf(ChannelRegistry::class);
 });
 
-it('checks if channel exists', function () {
+it('checks if channel exists', function (): void {
     $registry = new ConfigChannelRegistry;
 
     expect($registry->exists('email'))->toBeTrue();
     expect($registry->exists('nonexistent'))->toBeFalse();
 });
 
-it('gets a channel by slug', function () {
+it('gets a channel by slug', function (): void {
     $registry = new ConfigChannelRegistry;
 
     $item = $registry->get('email');
@@ -40,13 +40,13 @@ it('gets a channel by slug', function () {
     expect($item->metadata())->toBe(['category' => 'electronic']);
 });
 
-it('throws exception for nonexistent channel', function () {
+it('throws exception for nonexistent channel', function (): void {
     $registry = new ConfigChannelRegistry;
 
     $registry->get('nonexistent');
 })->throws(InvalidArgumentException::class);
 
-it('returns all channels', function () {
+it('returns all channels', function (): void {
     $registry = new ConfigChannelRegistry;
 
     $all = $registry->all();
@@ -55,7 +55,7 @@ it('returns all channels', function () {
     expect($all->map(fn ($item) => $item->slug())->all())->toContain('email', 'phone', 'sms', 'whatsapp', 'facebook');
 });
 
-it('returns channels for a category', function () {
+it('returns channels for a category', function (): void {
     $registry = new ConfigChannelRegistry;
 
     $electronic = $registry->forCategory('electronic');
@@ -69,7 +69,7 @@ it('returns channels for a category', function () {
     expect($messaging->first()->slug())->toBe('whatsapp');
 });
 
-it('returns empty collection for nonexistent category', function () {
+it('returns empty collection for nonexistent category', function (): void {
     $registry = new ConfigChannelRegistry;
 
     $result = $registry->forCategory('nonexistent');

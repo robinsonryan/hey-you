@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace RobinsonRyan\HeyYou\Resolver;
 
-final class ResolverExplanation
+final readonly class ResolverExplanation
 {
     /**
      * @param  array<string, int>  $exclusionSummary
      */
     public function __construct(
-        public readonly int $candidatesConsidered,
-        public readonly array $exclusionSummary,
-        public readonly bool $fallbackUsed,
-        public readonly ?string $fallbackPath,
+        public int $candidatesConsidered,
+        public array $exclusionSummary,
+        public bool $fallbackUsed,
+        public ?string $fallbackPath,
     ) {}
 }

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace RobinsonRyan\HeyYou\Resolver;
 
-final class ResolverConstraints
+final readonly class ResolverConstraints
 {
     /**
      * @param  list<string>  $excludeContactPointIds
      */
     public function __construct(
-        public readonly bool $requireVerified = false,
-        public readonly bool $requireConsent = false,
-        public readonly ?string $consentCategory = null,
-        public readonly bool $allowFallback = true,
-        public readonly array $excludeContactPointIds = [],
+        public bool $requireVerified = false,
+        public bool $requireConsent = false,
+        public ?string $consentCategory = null,
+        public bool $allowFallback = true,
+        public array $excludeContactPointIds = [],
     ) {}
 }

@@ -27,11 +27,6 @@ final class PhoneNormalizer implements ChannelNormalizer
             return '+1'.$cleaned;
         }
 
-        // If it's 11 digits starting with 1, add +
-        if (strlen($cleaned) === 11 && str_starts_with($cleaned, '1')) {
-            return '+'.$cleaned;
-        }
-
         // Otherwise return as-is with + prefix
         return '+'.$cleaned;
     }

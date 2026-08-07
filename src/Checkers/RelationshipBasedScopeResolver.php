@@ -40,7 +40,7 @@ final class RelationshipBasedScopeResolver implements ScopeHierarchyResolver
         while ($depth < self::MAX_DEPTH) {
             $parentParty = $this->findParentScope($currentParty, $visitedIds);
 
-            if ($parentParty === null) {
+            if (! $parentParty instanceof Party) {
                 break;
             }
 

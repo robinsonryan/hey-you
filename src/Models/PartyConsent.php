@@ -68,7 +68,7 @@ final class PartyConsent extends Model
 
     protected static function booted(): void
     {
-        self::created(function (PartyConsent $consent) {
+        self::created(function (PartyConsent $consent): void {
             $event = $consent->status === self::STATUS_OPTED_IN
                 ? new ConsentGranted($consent, 'party', $consent->purpose_category, $consent->channel)
                 : new ConsentRevoked($consent, 'party', $consent->purpose_category, $consent->channel);
@@ -76,7 +76,7 @@ final class PartyConsent extends Model
             app(EventDispatcher::class)->dispatch($event);
         });
 
-        self::updated(function (PartyConsent $consent) {
+        self::updated(function (PartyConsent $consent): void {
             if ($consent->wasChanged('status')) {
                 $event = $consent->status === self::STATUS_OPTED_IN
                     ? new ConsentGranted($consent, 'party', $consent->purpose_category, $consent->channel)

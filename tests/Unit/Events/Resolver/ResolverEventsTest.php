@@ -9,13 +9,13 @@ use RobinsonRyan\HeyYou\Resolver\ResolverRequest;
 use RobinsonRyan\HeyYou\Resolver\ResolverResult;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
     $this->party = $this->user->party;
 });
 
-describe('ContactResolved', function () {
-    it('contains the resolver request and result', function () {
+describe('ContactResolved', function (): void {
+    it('contains the resolver request and result', function (): void {
         $request = new ResolverRequest(
             targetParty: $this->party,
             purpose: 'billing',

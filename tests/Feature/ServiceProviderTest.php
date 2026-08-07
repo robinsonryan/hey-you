@@ -29,66 +29,66 @@ use RobinsonRyan\HeyYou\Resolver\DefaultContactResolver;
 use RobinsonRyan\HeyYou\Support\DefaultContactPointPurposeManager;
 use RobinsonRyan\HeyYou\Support\Uuid7Generator;
 
-describe('Service Provider bindings', function () {
-    it('binds IdentifierGenerator', function () {
+describe('Service Provider bindings', function (): void {
+    it('binds IdentifierGenerator', function (): void {
         expect(app(IdentifierGenerator::class))->toBeInstanceOf(Uuid7Generator::class);
     });
 
-    it('binds ChannelRegistry', function () {
+    it('binds ChannelRegistry', function (): void {
         expect(app(ChannelRegistry::class))->toBeInstanceOf(ConfigChannelRegistry::class);
     });
 
-    it('binds PurposeRegistry', function () {
+    it('binds PurposeRegistry', function (): void {
         expect(app(PurposeRegistry::class))->toBeInstanceOf(ConfigPurposeRegistry::class);
     });
 
-    it('binds RoleRegistry', function () {
+    it('binds RoleRegistry', function (): void {
         expect(app(RoleRegistry::class))->toBeInstanceOf(ConfigRoleRegistry::class);
     });
 
-    it('binds RelationshipTypeRegistry', function () {
+    it('binds RelationshipTypeRegistry', function (): void {
         expect(app(RelationshipTypeRegistry::class))->toBeInstanceOf(ConfigRelationshipTypeRegistry::class);
     });
 
-    it('binds ConsentCategoryRegistry', function () {
+    it('binds ConsentCategoryRegistry', function (): void {
         expect(app(ConsentCategoryRegistry::class))->toBeInstanceOf(ConfigConsentCategoryRegistry::class);
     });
 
-    it('binds NormalizerRegistry', function () {
+    it('binds NormalizerRegistry', function (): void {
         expect(app(NormalizerRegistry::class))->toBeInstanceOf(DefaultNormalizerRegistry::class);
     });
 
-    it('binds EventDispatcher', function () {
+    it('binds EventDispatcher', function (): void {
         expect(app(EventDispatcher::class))->toBeInstanceOf(LaravelEventDispatcher::class);
     });
 
-    it('binds ScopeHierarchyResolver', function () {
+    it('binds ScopeHierarchyResolver', function (): void {
         expect(app(ScopeHierarchyResolver::class))->toBeInstanceOf(RelationshipBasedScopeResolver::class);
     });
 
-    it('binds DncChecker', function () {
+    it('binds DncChecker', function (): void {
         expect(app(DncChecker::class))->toBeInstanceOf(DefaultDncChecker::class);
     });
 
-    it('binds ConsentChecker', function () {
+    it('binds ConsentChecker', function (): void {
         expect(app(ConsentChecker::class))->toBeInstanceOf(DefaultConsentChecker::class);
     });
 
-    it('binds ContactResolver', function () {
+    it('binds ContactResolver', function (): void {
         expect(app(ContactResolver::class))->toBeInstanceOf(DefaultContactResolver::class);
     });
 
-    it('binds ContactPointPurposeManager', function () {
+    it('binds ContactPointPurposeManager', function (): void {
         expect(app(ContactPointPurposeManager::class))->toBeInstanceOf(DefaultContactPointPurposeManager::class);
     });
 });
 
-describe('Configuration', function () {
-    it('has default table prefix', function () {
+describe('Configuration', function (): void {
+    it('has default table prefix', function (): void {
         expect(config('heyyou.table_prefix'))->toBe('heyyou_');
     });
 
-    it('has default channels', function () {
+    it('has default channels', function (): void {
         $channels = config('heyyou.channels');
 
         expect($channels)->toBeArray()
@@ -97,7 +97,7 @@ describe('Configuration', function () {
             ->and($channels)->toHaveKey('sms');
     });
 
-    it('has default purposes', function () {
+    it('has default purposes', function (): void {
         $purposes = config('heyyou.purposes');
 
         expect($purposes)->toBeArray()
@@ -106,7 +106,7 @@ describe('Configuration', function () {
             ->and($purposes)->toHaveKey('shipping');
     });
 
-    it('has default roles', function () {
+    it('has default roles', function (): void {
         $roles = config('heyyou.roles');
 
         expect($roles)->toBeArray()
@@ -114,7 +114,7 @@ describe('Configuration', function () {
             ->and($roles)->toHaveKey('primary_contact');
     });
 
-    it('has default consent categories', function () {
+    it('has default consent categories', function (): void {
         $categories = config('heyyou.consent_categories');
 
         expect($categories)->toBeArray()

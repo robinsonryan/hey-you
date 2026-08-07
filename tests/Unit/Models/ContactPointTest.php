@@ -9,7 +9,7 @@ use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Models\VerificationEvent;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->party = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -17,13 +17,13 @@ beforeEach(function () {
     ]);
 });
 
-it('uses the prefixed table name', function () {
+it('uses the prefixed table name', function (): void {
     $contactPoint = new ContactPoint;
 
     expect($contactPoint->getTable())->toBe('heyyou_contact_points');
 });
 
-it('normalizes email on save', function () {
+it('normalizes email on save', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -33,7 +33,7 @@ it('normalizes email on save', function () {
     expect($contactPoint->value_normalized)->toBe('john.doe@example.com');
 });
 
-it('normalizes phone on save', function () {
+it('normalizes phone on save', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'phone',
@@ -43,7 +43,7 @@ it('normalizes phone on save', function () {
     expect($contactPoint->value_normalized)->toBe('+15551234567');
 });
 
-it('normalizes sms like phone', function () {
+it('normalizes sms like phone', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'sms',
@@ -53,7 +53,7 @@ it('normalizes sms like phone', function () {
     expect($contactPoint->value_normalized)->toBe('+15551234567');
 });
 
-it('uses default normalizer for unknown channels', function () {
+it('uses default normalizer for unknown channels', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'whatsapp',
@@ -63,7 +63,7 @@ it('uses default normalizer for unknown channels', function () {
     expect($contactPoint->value_normalized)->toBe('@username');
 });
 
-it('defaults status to active', function () {
+it('defaults status to active', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -73,7 +73,7 @@ it('defaults status to active', function () {
     expect($contactPoint->status)->toBe('active');
 });
 
-it('defaults is_primary to false', function () {
+it('defaults is_primary to false', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -83,7 +83,7 @@ it('defaults is_primary to false', function () {
     expect($contactPoint->is_primary)->toBeFalse();
 });
 
-it('defaults is_verified to false', function () {
+it('defaults is_verified to false', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -93,7 +93,7 @@ it('defaults is_verified to false', function () {
     expect($contactPoint->is_verified)->toBeFalse();
 });
 
-it('belongs to party', function () {
+it('belongs to party', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -103,7 +103,7 @@ it('belongs to party', function () {
     expect($contactPoint->party->id)->toBe($this->party->id);
 });
 
-it('checks if currently verified when verified and no expiration', function () {
+it('checks if currently verified when verified and no expiration', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -115,7 +115,7 @@ it('checks if currently verified when verified and no expiration', function () {
     expect($contactPoint->isCurrentlyVerified())->toBeTrue();
 });
 
-it('checks if currently verified when not verified', function () {
+it('checks if currently verified when not verified', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -126,7 +126,7 @@ it('checks if currently verified when not verified', function () {
     expect($contactPoint->isCurrentlyVerified())->toBeFalse();
 });
 
-it('checks if currently verified when verification expired', function () {
+it('checks if currently verified when verification expired', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -139,7 +139,7 @@ it('checks if currently verified when verification expired', function () {
     expect($contactPoint->isCurrentlyVerified())->toBeFalse();
 });
 
-it('checks if currently verified when verification not yet expired', function () {
+it('checks if currently verified when verification not yet expired', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -152,7 +152,7 @@ it('checks if currently verified when verification not yet expired', function ()
     expect($contactPoint->isCurrentlyVerified())->toBeTrue();
 });
 
-it('can be soft deleted', function () {
+it('can be soft deleted', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -165,7 +165,7 @@ it('can be soft deleted', function () {
     expect(ContactPoint::withTrashed()->find($contactPoint->id))->not->toBeNull();
 });
 
-it('enforces unique constraint on party channel and normalized value', function () {
+it('enforces unique constraint on party channel and normalized value', function (): void {
     ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -179,7 +179,7 @@ it('enforces unique constraint on party channel and normalized value', function 
     ]);
 })->throws(Illuminate\Database\QueryException::class);
 
-it('has consents relationship', function () {
+it('has consents relationship', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',
@@ -198,7 +198,7 @@ it('has consents relationship', function () {
     expect($contactPoint->consents->first()->purpose_category)->toBe('marketing');
 });
 
-it('has verificationEvents relationship', function () {
+it('has verificationEvents relationship', function (): void {
     $contactPoint = ContactPoint::create([
         'party_id' => $this->party->id,
         'channel' => 'email',

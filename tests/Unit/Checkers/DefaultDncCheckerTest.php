@@ -8,11 +8,11 @@ use RobinsonRyan\HeyYou\Models\ContactPoint;
 use RobinsonRyan\HeyYou\Models\DoNotContact;
 use RobinsonRyan\HeyYou\Models\Party;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->checker = new DefaultDncChecker;
 });
 
-it('returns allowed when no dnc rules exist', function () {
+it('returns allowed when no dnc rules exist', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -34,7 +34,7 @@ it('returns allowed when no dnc rules exist', function () {
     expect($result->rule)->toBeNull();
 });
 
-it('blocks when party-wide dnc exists', function () {
+it('blocks when party-wide dnc exists', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -66,7 +66,7 @@ it('blocks when party-wide dnc exists', function () {
     expect($result->rule->id)->toBe($dnc->id);
 });
 
-it('blocks when channel-specific dnc exists', function () {
+it('blocks when channel-specific dnc exists', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -97,7 +97,7 @@ it('blocks when channel-specific dnc exists', function () {
     expect($result->reason)->toBe('No email contact');
 });
 
-it('blocks when purpose-specific dnc exists and purpose matches', function () {
+it('blocks when purpose-specific dnc exists and purpose matches', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -128,7 +128,7 @@ it('blocks when purpose-specific dnc exists and purpose matches', function () {
     expect($result->reason)->toBe('No marketing contact');
 });
 
-it('does not block when purpose-specific dnc exists but purpose does not match', function () {
+it('does not block when purpose-specific dnc exists but purpose does not match', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -158,7 +158,7 @@ it('does not block when purpose-specific dnc exists but purpose does not match',
     expect($result->blocked)->toBeFalse();
 });
 
-it('blocks when channel and purpose combination dnc exists', function () {
+it('blocks when channel and purpose combination dnc exists', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -188,7 +188,7 @@ it('blocks when channel and purpose combination dnc exists', function () {
     expect($result->scope)->toBe('channel_purpose');
 });
 
-it('blocks when specific contact point dnc exists', function () {
+it('blocks when specific contact point dnc exists', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -219,7 +219,7 @@ it('blocks when specific contact point dnc exists', function () {
     expect($result->reason)->toBe('Email bounced');
 });
 
-it('does not block when dnc not yet effective', function () {
+it('does not block when dnc not yet effective', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -248,7 +248,7 @@ it('does not block when dnc not yet effective', function () {
     expect($result->blocked)->toBeFalse();
 });
 
-it('does not block when dnc has expired', function () {
+it('does not block when dnc has expired', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -278,7 +278,7 @@ it('does not block when dnc has expired', function () {
     expect($result->blocked)->toBeFalse();
 });
 
-it('ignores soft deleted dnc rules', function () {
+it('ignores soft deleted dnc rules', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -309,7 +309,7 @@ it('ignores soft deleted dnc rules', function () {
     expect($result->blocked)->toBeFalse();
 });
 
-it('prefers more specific dnc scope over general', function () {
+it('prefers more specific dnc scope over general', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -353,7 +353,7 @@ it('prefers more specific dnc scope over general', function () {
     expect($result->reason)->toBe('Contact point reason');
 });
 
-it('does not block different channel than dnc channel', function () {
+it('does not block different channel than dnc channel', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),

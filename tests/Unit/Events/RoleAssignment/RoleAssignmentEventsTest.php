@@ -11,15 +11,15 @@ use RobinsonRyan\HeyYou\Models\RoleAssignment;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\Company;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
     $this->company = Company::create(['legal_name' => 'Acme Corp']);
     $this->party = $this->user->party;
     $this->scopeParty = $this->company->party;
 });
 
-describe('RoleAssignmentCreated', function () {
-    it('contains the role assignment, party, and scope party', function () {
+describe('RoleAssignmentCreated', function (): void {
+    it('contains the role assignment, party, and scope party', function (): void {
         $roleAssignment = RoleAssignment::create([
             'party_id' => $this->party->id,
             'scope_party_id' => $this->scopeParty->id,
@@ -37,8 +37,8 @@ describe('RoleAssignmentCreated', function () {
     });
 });
 
-describe('RoleAssignmentUpdated', function () {
-    it('contains the role assignment and changed attributes', function () {
+describe('RoleAssignmentUpdated', function (): void {
+    it('contains the role assignment and changed attributes', function (): void {
         $roleAssignment = RoleAssignment::create([
             'party_id' => $this->party->id,
             'scope_party_id' => $this->scopeParty->id,
@@ -52,8 +52,8 @@ describe('RoleAssignmentUpdated', function () {
     });
 });
 
-describe('RoleAssignmentExpired', function () {
-    it('contains the role assignment when valid_to passes', function () {
+describe('RoleAssignmentExpired', function (): void {
+    it('contains the role assignment when valid_to passes', function (): void {
         $roleAssignment = RoleAssignment::create([
             'party_id' => $this->party->id,
             'scope_party_id' => $this->scopeParty->id,
@@ -66,8 +66,8 @@ describe('RoleAssignmentExpired', function () {
     });
 });
 
-describe('RoleAssignmentDeleted', function () {
-    it('contains the role assignment', function () {
+describe('RoleAssignmentDeleted', function (): void {
+    it('contains the role assignment', function (): void {
         $roleAssignment = RoleAssignment::create([
             'party_id' => $this->party->id,
             'scope_party_id' => $this->scopeParty->id,

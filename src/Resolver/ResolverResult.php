@@ -6,14 +6,14 @@ namespace RobinsonRyan\HeyYou\Resolver;
 
 use Illuminate\Support\Collection;
 
-final class ResolverResult
+final readonly class ResolverResult
 {
     /**
      * @param  Collection<int, ResolverMatch>  $matches
      */
     public function __construct(
-        public readonly Collection $matches,
-        public readonly ResolverExplanation $explanation,
+        public Collection $matches,
+        public ResolverExplanation $explanation,
     ) {}
 
     public function best(): ?ResolverMatch

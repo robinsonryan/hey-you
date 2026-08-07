@@ -16,14 +16,14 @@ final class DefaultDncChecker implements DncChecker
         // Check from most specific to least specific
         // 1. Specific contact point
         $rule = $this->findContactPointRule($contactPoint);
-        if ($rule !== null) {
+        if ($rule instanceof DoNotContact) {
             return DncResult::blocked('contact_point', $rule->reason, $rule);
         }
 
         // 2. Channel + purpose combination (if purpose provided)
         if ($purpose !== null) {
             $rule = $this->findChannelPurposeRule($contactPoint, $purpose);
-            if ($rule !== null) {
+            if ($rule instanceof DoNotContact) {
                 return DncResult::blocked('channel_purpose', $rule->reason, $rule);
             }
         }
@@ -31,20 +31,20 @@ final class DefaultDncChecker implements DncChecker
         // 3. Purpose specific (if purpose provided)
         if ($purpose !== null) {
             $rule = $this->findPurposeRule($contactPoint, $purpose);
-            if ($rule !== null) {
+            if ($rule instanceof DoNotContact) {
                 return DncResult::blocked('purpose', $rule->reason, $rule);
             }
         }
 
         // 4. Channel specific
         $rule = $this->findChannelRule($contactPoint);
-        if ($rule !== null) {
+        if ($rule instanceof DoNotContact) {
             return DncResult::blocked('channel', $rule->reason, $rule);
         }
 
         // 5. Party-wide DNC
         $rule = $this->findPartyRule($contactPoint);
-        if ($rule !== null) {
+        if ($rule instanceof DoNotContact) {
             return DncResult::blocked('party', $rule->reason, $rule);
         }
 

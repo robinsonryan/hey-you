@@ -8,7 +8,7 @@ use RobinsonRyan\HeyYou\Models\RoleAssignment;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\Company;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->personParty = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -22,13 +22,13 @@ beforeEach(function () {
     ]);
 });
 
-it('uses the prefixed table name', function () {
+it('uses the prefixed table name', function (): void {
     $roleAssignment = new RoleAssignment;
 
     expect($roleAssignment->getTable())->toBe('heyyou_role_assignments');
 });
 
-it('has fillable attributes', function () {
+it('has fillable attributes', function (): void {
     $roleAssignment = RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -45,7 +45,7 @@ it('has fillable attributes', function () {
     expect($roleAssignment->metadata)->toBe(['department' => 'Finance']);
 });
 
-it('defaults priority to 0', function () {
+it('defaults priority to 0', function (): void {
     $roleAssignment = RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -55,7 +55,7 @@ it('defaults priority to 0', function () {
     expect($roleAssignment->priority)->toBe(0);
 });
 
-it('belongs to party', function () {
+it('belongs to party', function (): void {
     $roleAssignment = RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -65,7 +65,7 @@ it('belongs to party', function () {
     expect($roleAssignment->party->id)->toBe($this->personParty->id);
 });
 
-it('belongs to scope party', function () {
+it('belongs to scope party', function (): void {
     $roleAssignment = RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -75,7 +75,7 @@ it('belongs to scope party', function () {
     expect($roleAssignment->scopeParty->id)->toBe($this->orgParty->id);
 });
 
-it('casts valid_from and valid_to to datetime', function () {
+it('casts valid_from and valid_to to datetime', function (): void {
     $roleAssignment = RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -88,7 +88,7 @@ it('casts valid_from and valid_to to datetime', function () {
     expect($roleAssignment->valid_to)->toBeInstanceOf(Carbon::class);
 });
 
-it('can be soft deleted', function () {
+it('can be soft deleted', function (): void {
     $roleAssignment = RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -101,7 +101,7 @@ it('can be soft deleted', function () {
     expect(RoleAssignment::withTrashed()->find($roleAssignment->id))->not->toBeNull();
 });
 
-it('scopes to current role assignments with no dates', function () {
+it('scopes to current role assignments with no dates', function (): void {
     RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -113,7 +113,7 @@ it('scopes to current role assignments with no dates', function () {
     expect(RoleAssignment::current()->count())->toBe(1);
 });
 
-it('scopes to current role assignments that have started', function () {
+it('scopes to current role assignments that have started', function (): void {
     RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -125,7 +125,7 @@ it('scopes to current role assignments that have started', function () {
     expect(RoleAssignment::current()->count())->toBe(1);
 });
 
-it('excludes role assignments that have not started', function () {
+it('excludes role assignments that have not started', function (): void {
     RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -137,7 +137,7 @@ it('excludes role assignments that have not started', function () {
     expect(RoleAssignment::current()->count())->toBe(0);
 });
 
-it('excludes role assignments that have ended', function () {
+it('excludes role assignments that have ended', function (): void {
     RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -149,7 +149,7 @@ it('excludes role assignments that have ended', function () {
     expect(RoleAssignment::current()->count())->toBe(0);
 });
 
-it('includes role assignments that are currently active', function () {
+it('includes role assignments that are currently active', function (): void {
     RoleAssignment::create([
         'party_id' => $this->personParty->id,
         'scope_party_id' => $this->orgParty->id,
@@ -161,7 +161,7 @@ it('includes role assignments that are currently active', function () {
     expect(RoleAssignment::current()->count())->toBe(1);
 });
 
-it('can find role holders for a scope and role', function () {
+it('can find role holders for a scope and role', function (): void {
     // Create multiple role holders with different priorities
     RoleAssignment::create([
         'party_id' => $this->personParty->id,

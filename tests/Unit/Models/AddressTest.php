@@ -7,7 +7,7 @@ use RobinsonRyan\HeyYou\Models\Address;
 use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->party = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -15,13 +15,13 @@ beforeEach(function () {
     ]);
 });
 
-it('uses the prefixed table name', function () {
+it('uses the prefixed table name', function (): void {
     $address = new Address;
 
     expect($address->getTable())->toBe('heyyou_addresses');
 });
 
-it('has fillable attributes', function () {
+it('has fillable attributes', function (): void {
     $address = Address::create([
         'party_id' => $this->party->id,
         'purpose' => 'billing',
@@ -50,7 +50,7 @@ it('has fillable attributes', function () {
     expect($address->metadata)->toBe(['floor' => 5]);
 });
 
-it('defaults is_primary to false', function () {
+it('defaults is_primary to false', function (): void {
     $address = Address::create([
         'party_id' => $this->party->id,
         'purpose' => 'shipping',
@@ -62,7 +62,7 @@ it('defaults is_primary to false', function () {
     expect($address->is_primary)->toBeFalse();
 });
 
-it('defaults validation_status to unverified', function () {
+it('defaults validation_status to unverified', function (): void {
     $address = Address::create([
         'party_id' => $this->party->id,
         'purpose' => 'shipping',
@@ -74,7 +74,7 @@ it('defaults validation_status to unverified', function () {
     expect($address->validation_status)->toBe('unverified');
 });
 
-it('belongs to party', function () {
+it('belongs to party', function (): void {
     $address = Address::create([
         'party_id' => $this->party->id,
         'purpose' => 'billing',
@@ -86,7 +86,7 @@ it('belongs to party', function () {
     expect($address->party->id)->toBe($this->party->id);
 });
 
-it('casts geocode to array', function () {
+it('casts geocode to array', function (): void {
     $address = Address::create([
         'party_id' => $this->party->id,
         'purpose' => 'billing',
@@ -103,7 +103,7 @@ it('casts geocode to array', function () {
     expect($address->geocode['lng'])->toBe(-74.0060);
 });
 
-it('casts valid_from and valid_to to datetime', function () {
+it('casts valid_from and valid_to to datetime', function (): void {
     $address = Address::create([
         'party_id' => $this->party->id,
         'purpose' => 'billing',
@@ -118,7 +118,7 @@ it('casts valid_from and valid_to to datetime', function () {
     expect($address->valid_to)->toBeInstanceOf(Carbon::class);
 });
 
-it('can be soft deleted', function () {
+it('can be soft deleted', function (): void {
     $address = Address::create([
         'party_id' => $this->party->id,
         'purpose' => 'billing',
@@ -133,7 +133,7 @@ it('can be soft deleted', function () {
     expect(Address::withTrashed()->find($address->id))->not->toBeNull();
 });
 
-it('scopes to current addresses', function () {
+it('scopes to current addresses', function (): void {
     // Current address (no dates)
     Address::create([
         'party_id' => $this->party->id,

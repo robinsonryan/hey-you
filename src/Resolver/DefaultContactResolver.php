@@ -16,7 +16,7 @@ use RobinsonRyan\HeyYou\Models\ContactPoint;
 use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Models\RoleAssignment;
 
-final class DefaultContactResolver implements ContactResolver
+final readonly class DefaultContactResolver implements ContactResolver
 {
     /**
      * Status ranking order (lower index = better).
@@ -40,11 +40,11 @@ final class DefaultContactResolver implements ContactResolver
     ];
 
     public function __construct(
-        private readonly ScopeHierarchyResolver $scopeResolver,
-        private readonly DncChecker $dncChecker,
-        private readonly ConsentChecker $consentChecker,
-        private readonly PurposeRegistry $purposeRegistry,
-        private readonly EventDispatcher $eventDispatcher,
+        private ScopeHierarchyResolver $scopeResolver,
+        private DncChecker $dncChecker,
+        private ConsentChecker $consentChecker,
+        private PurposeRegistry $purposeRegistry,
+        private EventDispatcher $eventDispatcher,
     ) {}
 
     public function resolve(ResolverRequest $request): ResolverResult
@@ -94,9 +94,7 @@ final class DefaultContactResolver implements ContactResolver
         $limited = $ranked->take($request->limit);
 
         // Build matches with assigned ranks
-        $matches = $limited->values()->map(function (array $candidate, int $index): ResolverMatch {
-            return $this->buildMatch($candidate, $index + 1);
-        });
+        $matches = $limited->values()->map(fn (array $candidate, int $index): ResolverMatch => $this->buildMatch($candidate, $index + 1));
 
         $result = new ResolverResult(
             matches: $matches,

@@ -8,13 +8,13 @@ use RobinsonRyan\HeyYou\Models\ContactPointConsent;
 use RobinsonRyan\HeyYou\Models\PartyConsent;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
     $this->party = $this->user->party;
 });
 
-describe('ConsentGranted', function () {
-    it('contains party consent details', function () {
+describe('ConsentGranted', function (): void {
+    it('contains party consent details', function (): void {
         $consent = PartyConsent::create([
             'party_id' => $this->party->id,
             'purpose_category' => 'marketing',
@@ -32,7 +32,7 @@ describe('ConsentGranted', function () {
             ->and($event->channel)->toBe('email');
     });
 
-    it('contains contact point consent details', function () {
+    it('contains contact point consent details', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -54,8 +54,8 @@ describe('ConsentGranted', function () {
     });
 });
 
-describe('ConsentRevoked', function () {
-    it('contains revoked consent details', function () {
+describe('ConsentRevoked', function (): void {
+    it('contains revoked consent details', function (): void {
         $consent = PartyConsent::create([
             'party_id' => $this->party->id,
             'purpose_category' => 'marketing',

@@ -7,7 +7,7 @@ use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Models\PartyRelationship;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->party1 = Party::create([
         'partyable_type' => User::class,
         'partyable_id' => fakePartyableId(),
@@ -21,13 +21,13 @@ beforeEach(function () {
     ]);
 });
 
-it('uses the prefixed table name', function () {
+it('uses the prefixed table name', function (): void {
     $relationship = new PartyRelationship;
 
     expect($relationship->getTable())->toBe('heyyou_party_relationships');
 });
 
-it('has fillable attributes', function () {
+it('has fillable attributes', function (): void {
     $relationship = PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,
@@ -45,7 +45,7 @@ it('has fillable attributes', function () {
     expect($relationship->metadata)->toBe(['department' => 'Engineering']);
 });
 
-it('casts dates properly', function () {
+it('casts dates properly', function (): void {
     $relationship = PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,
@@ -58,7 +58,7 @@ it('casts dates properly', function () {
     expect($relationship->valid_to)->toBeInstanceOf(Carbon::class);
 });
 
-it('belongs to from party', function () {
+it('belongs to from party', function (): void {
     $relationship = PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,
@@ -68,7 +68,7 @@ it('belongs to from party', function () {
     expect($relationship->fromParty->id)->toBe($this->party1->id);
 });
 
-it('belongs to to party', function () {
+it('belongs to to party', function (): void {
     $relationship = PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,
@@ -78,7 +78,7 @@ it('belongs to to party', function () {
     expect($relationship->toParty->id)->toBe($this->party2->id);
 });
 
-it('scopes to current relationships with no dates', function () {
+it('scopes to current relationships with no dates', function (): void {
     PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,
@@ -90,7 +90,7 @@ it('scopes to current relationships with no dates', function () {
     expect(PartyRelationship::current()->count())->toBe(1);
 });
 
-it('scopes to current relationships that have started', function () {
+it('scopes to current relationships that have started', function (): void {
     PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,
@@ -102,7 +102,7 @@ it('scopes to current relationships that have started', function () {
     expect(PartyRelationship::current()->count())->toBe(1);
 });
 
-it('excludes relationships that have not started', function () {
+it('excludes relationships that have not started', function (): void {
     PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,
@@ -114,7 +114,7 @@ it('excludes relationships that have not started', function () {
     expect(PartyRelationship::current()->count())->toBe(0);
 });
 
-it('excludes relationships that have ended', function () {
+it('excludes relationships that have ended', function (): void {
     PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,
@@ -126,7 +126,7 @@ it('excludes relationships that have ended', function () {
     expect(PartyRelationship::current()->count())->toBe(0);
 });
 
-it('includes relationships that are currently active', function () {
+it('includes relationships that are currently active', function (): void {
     PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,
@@ -138,7 +138,7 @@ it('includes relationships that are currently active', function () {
     expect(PartyRelationship::current()->count())->toBe(1);
 });
 
-it('can be soft deleted', function () {
+it('can be soft deleted', function (): void {
     $relationship = PartyRelationship::create([
         'from_party_id' => $this->party1->id,
         'to_party_id' => $this->party2->id,

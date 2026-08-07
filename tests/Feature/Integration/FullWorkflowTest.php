@@ -17,8 +17,8 @@ use RobinsonRyan\HeyYou\Resolver\ResolverRequest;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\Company;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-describe('Full Workflow Integration', function () {
-    it('completes a full B2B contact management workflow', function () {
+describe('Full Workflow Integration', function (): void {
+    it('completes a full B2B contact management workflow', function (): void {
         // Step 1: Create a company with the Contactable trait
         $company = Company::create(['legal_name' => 'Acme Corp']);
 
@@ -130,7 +130,7 @@ describe('Full Workflow Integration', function () {
         expect($result->best()->owningParty->id)->toBe($employee->party->id);
     });
 
-    it('handles the full consent and DNC workflow', function () {
+    it('handles the full consent and DNC workflow', function (): void {
         // Create a party with contact points
         $party = Party::factory()->create();
 
@@ -194,7 +194,7 @@ describe('Full Workflow Integration', function () {
         expect($dncResult->scope)->toBe('purpose');
     });
 
-    it('handles contact point verification lifecycle', function () {
+    it('handles contact point verification lifecycle', function (): void {
         $party = Party::factory()->create();
 
         // Create unverified contact point
@@ -226,7 +226,7 @@ describe('Full Workflow Integration', function () {
         expect($expiringContact->isCurrentlyVerified())->toBeFalse();
     });
 
-    it('handles role assignment temporal validity', function () {
+    it('handles role assignment temporal validity', function (): void {
         $person = Party::factory()->person()->create();
         $company = Party::factory()->organization()->create();
 
@@ -264,7 +264,7 @@ describe('Full Workflow Integration', function () {
         expect($currentRoles->first()->role)->toBe('hr_contact');
     });
 
-    it('handles address management with purposes', function () {
+    it('handles address management with purposes', function (): void {
         $party = Party::factory()->organization()->create();
 
         // Create multiple addresses for different purposes
@@ -311,8 +311,8 @@ describe('Full Workflow Integration', function () {
     });
 });
 
-describe('Contact Resolution End-to-End', function () {
-    it('resolves contacts through organizational hierarchy', function () {
+describe('Contact Resolution End-to-End', function (): void {
+    it('resolves contacts through organizational hierarchy', function (): void {
         // Create organizational structure:
         // Parent Corp
         //   └── Regional Office
@@ -387,7 +387,7 @@ describe('Contact Resolution End-to-End', function () {
         expect($result->explanation->fallbackUsed)->toBeTrue();
     });
 
-    it('excludes DNC-blocked contacts from resolution', function () {
+    it('excludes DNC-blocked contacts from resolution', function (): void {
         $company = Party::factory()->organization()->create();
         $person = Party::factory()->person()->create();
 
@@ -429,7 +429,7 @@ describe('Contact Resolution End-to-End', function () {
         expect($result->explanation->exclusionSummary['dnc'])->toBe(1);
     });
 
-    it('ranks contacts correctly based on verification and primary status', function () {
+    it('ranks contacts correctly based on verification and primary status', function (): void {
         $company = Party::factory()->organization()->create();
 
         // Create multiple employees with different contact qualities

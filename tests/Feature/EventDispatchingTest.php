@@ -47,19 +47,17 @@ use RobinsonRyan\HeyYou\Resolver\ResolverRequest;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\Company;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-describe('Party events', function () {
-    it('dispatches PartyCreated when a party is created', function () {
+describe('Party events', function (): void {
+    it('dispatches PartyCreated when a party is created', function (): void {
         Event::fake([PartyCreated::class]);
 
         $user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
 
-        Event::assertDispatched(PartyCreated::class, function (PartyCreated $event) use ($user) {
-            return $event->party->id === $user->party->id
-                && $event->partyable->getKey() === $user->getKey();
-        });
+        Event::assertDispatched(PartyCreated::class, fn (PartyCreated $event): bool => $event->party->id === $user->party->id
+            && $event->partyable->getKey() === $user->getKey());
     });
 
-    it('dispatches PartyUpdated when a party is updated', function () {
+    it('dispatches PartyUpdated when a party is updated', function (): void {
         Event::fake([PartyUpdated::class]);
 
         $user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
@@ -67,24 +65,20 @@ describe('Party events', function () {
 
         $user->party->update(['display_name_cached' => 'Jane Doe']);
 
-        Event::assertDispatched(PartyUpdated::class, function (PartyUpdated $event) {
-            return $event->changedAttributes['display_name_cached'] === 'Jane Doe';
-        });
+        Event::assertDispatched(PartyUpdated::class, fn (PartyUpdated $event): bool => $event->changedAttributes['display_name_cached'] === 'Jane Doe');
     });
 
-    it('dispatches PartyDeleted when a party is deleted', function () {
+    it('dispatches PartyDeleted when a party is deleted', function (): void {
         Event::fake([PartyDeleted::class]);
 
         $user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
         $party = $user->party;
         $party->delete();
 
-        Event::assertDispatched(PartyDeleted::class, function (PartyDeleted $event) use ($party) {
-            return $event->party->id === $party->id;
-        });
+        Event::assertDispatched(PartyDeleted::class, fn (PartyDeleted $event): bool => $event->party->id === $party->id);
     });
 
-    it('dispatches PartyRestored when a party is restored', function () {
+    it('dispatches PartyRestored when a party is restored', function (): void {
         $user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
         $party = $user->party;
         $party->delete();
@@ -93,19 +87,17 @@ describe('Party events', function () {
 
         $party->restore();
 
-        Event::assertDispatched(PartyRestored::class, function (PartyRestored $event) use ($party) {
-            return $event->party->id === $party->id;
-        });
+        Event::assertDispatched(PartyRestored::class, fn (PartyRestored $event): bool => $event->party->id === $party->id);
     });
 });
 
-describe('ContactPoint events', function () {
-    beforeEach(function () {
+describe('ContactPoint events', function (): void {
+    beforeEach(function (): void {
         $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
         $this->party = $this->user->party;
     });
 
-    it('dispatches ContactPointCreated when a contact point is created', function () {
+    it('dispatches ContactPointCreated when a contact point is created', function (): void {
         Event::fake([ContactPointCreated::class]);
 
         $contactPoint = $this->party->contactPoints()->create([
@@ -113,13 +105,11 @@ describe('ContactPoint events', function () {
             'value_raw' => 'test@example.com',
         ]);
 
-        Event::assertDispatched(ContactPointCreated::class, function (ContactPointCreated $event) use ($contactPoint) {
-            return $event->contactPoint->id === $contactPoint->id
-                && $event->party->id === $this->party->id;
-        });
+        Event::assertDispatched(ContactPointCreated::class, fn (ContactPointCreated $event): bool => $event->contactPoint->id === $contactPoint->id
+            && $event->party->id === $this->party->id);
     });
 
-    it('dispatches ContactPointUpdated when a contact point is updated', function () {
+    it('dispatches ContactPointUpdated when a contact point is updated', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -129,12 +119,10 @@ describe('ContactPoint events', function () {
 
         $contactPoint->update(['label' => 'Work Email']);
 
-        Event::assertDispatched(ContactPointUpdated::class, function (ContactPointUpdated $event) {
-            return $event->changedAttributes['label'] === 'Work Email';
-        });
+        Event::assertDispatched(ContactPointUpdated::class, fn (ContactPointUpdated $event): bool => $event->changedAttributes['label'] === 'Work Email');
     });
 
-    it('dispatches ContactPointVerified when a contact point is verified', function () {
+    it('dispatches ContactPointVerified when a contact point is verified', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -148,13 +136,11 @@ describe('ContactPoint events', function () {
             'verified_at' => now(),
         ]);
 
-        Event::assertDispatched(ContactPointVerified::class, function (ContactPointVerified $event) use ($contactPoint) {
-            return $event->contactPoint->id === $contactPoint->id
-                && $event->method === 'code';
-        });
+        Event::assertDispatched(ContactPointVerified::class, fn (ContactPointVerified $event): bool => $event->contactPoint->id === $contactPoint->id
+            && $event->method === 'code');
     });
 
-    it('dispatches ContactPointDeleted when a contact point is deleted', function () {
+    it('dispatches ContactPointDeleted when a contact point is deleted', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -164,12 +150,10 @@ describe('ContactPoint events', function () {
 
         $contactPoint->delete();
 
-        Event::assertDispatched(ContactPointDeleted::class, function (ContactPointDeleted $event) use ($contactPoint) {
-            return $event->contactPoint->id === $contactPoint->id;
-        });
+        Event::assertDispatched(ContactPointDeleted::class, fn (ContactPointDeleted $event): bool => $event->contactPoint->id === $contactPoint->id);
     });
 
-    it('dispatches ContactPointRestored when a contact point is restored', function () {
+    it('dispatches ContactPointRestored when a contact point is restored', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -180,12 +164,10 @@ describe('ContactPoint events', function () {
 
         $contactPoint->restore();
 
-        Event::assertDispatched(ContactPointRestored::class, function (ContactPointRestored $event) use ($contactPoint) {
-            return $event->contactPoint->id === $contactPoint->id;
-        });
+        Event::assertDispatched(ContactPointRestored::class, fn (ContactPointRestored $event): bool => $event->contactPoint->id === $contactPoint->id);
     });
 
-    it('dispatches ContactPointBounced when status changes to bounced', function () {
+    it('dispatches ContactPointBounced when status changes to bounced', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -196,12 +178,10 @@ describe('ContactPoint events', function () {
 
         $contactPoint->update(['status' => ContactPoint::STATUS_BOUNCED]);
 
-        Event::assertDispatched(ContactPointBounced::class, function (ContactPointBounced $event) use ($contactPoint) {
-            return $event->contactPoint->id === $contactPoint->id;
-        });
+        Event::assertDispatched(ContactPointBounced::class, fn (ContactPointBounced $event): bool => $event->contactPoint->id === $contactPoint->id);
     });
 
-    it('dispatches ContactPointMarkedUnreachable when status changes to unreachable', function () {
+    it('dispatches ContactPointMarkedUnreachable when status changes to unreachable', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -212,12 +192,10 @@ describe('ContactPoint events', function () {
 
         $contactPoint->update(['status' => ContactPoint::STATUS_UNREACHABLE]);
 
-        Event::assertDispatched(ContactPointMarkedUnreachable::class, function (ContactPointMarkedUnreachable $event) use ($contactPoint) {
-            return $event->contactPoint->id === $contactPoint->id;
-        });
+        Event::assertDispatched(ContactPointMarkedUnreachable::class, fn (ContactPointMarkedUnreachable $event): bool => $event->contactPoint->id === $contactPoint->id);
     });
 
-    it('dispatches ContactPointPurposeAttached when a purpose is added', function () {
+    it('dispatches ContactPointPurposeAttached when a purpose is added', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -232,13 +210,11 @@ describe('ContactPoint events', function () {
             'is_preferred' => true,
         ]);
 
-        Event::assertDispatched(ContactPointPurposeAttached::class, function (ContactPointPurposeAttached $event) use ($contactPoint) {
-            return $event->contactPoint->id === $contactPoint->id
-                && $event->purpose === 'billing';
-        });
+        Event::assertDispatched(ContactPointPurposeAttached::class, fn (ContactPointPurposeAttached $event): bool => $event->contactPoint->id === $contactPoint->id
+            && $event->purpose === 'billing');
     });
 
-    it('dispatches ContactPointPurposeDetached when a purpose is removed', function () {
+    it('dispatches ContactPointPurposeDetached when a purpose is removed', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -255,20 +231,18 @@ describe('ContactPoint events', function () {
 
         $purpose->delete();
 
-        Event::assertDispatched(ContactPointPurposeDetached::class, function (ContactPointPurposeDetached $event) use ($contactPoint) {
-            return $event->contactPoint->id === $contactPoint->id
-                && $event->purpose === 'billing';
-        });
+        Event::assertDispatched(ContactPointPurposeDetached::class, fn (ContactPointPurposeDetached $event): bool => $event->contactPoint->id === $contactPoint->id
+            && $event->purpose === 'billing');
     });
 });
 
-describe('Consent events', function () {
-    beforeEach(function () {
+describe('Consent events', function (): void {
+    beforeEach(function (): void {
         $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
         $this->party = $this->user->party;
     });
 
-    it('dispatches ConsentGranted when party consent is created with opted_in', function () {
+    it('dispatches ConsentGranted when party consent is created with opted_in', function (): void {
         Event::fake([ConsentGranted::class]);
 
         PartyConsent::create([
@@ -280,14 +254,12 @@ describe('Consent events', function () {
             'source' => 'web_form',
         ]);
 
-        Event::assertDispatched(ConsentGranted::class, function (ConsentGranted $event) {
-            return $event->level === 'party'
-                && $event->purposeCategory === 'marketing'
-                && $event->channel === 'email';
-        });
+        Event::assertDispatched(ConsentGranted::class, fn (ConsentGranted $event): bool => $event->level === 'party'
+            && $event->purposeCategory === 'marketing'
+            && $event->channel === 'email');
     });
 
-    it('dispatches ConsentRevoked when party consent is created with opted_out', function () {
+    it('dispatches ConsentRevoked when party consent is created with opted_out', function (): void {
         Event::fake([ConsentRevoked::class]);
 
         PartyConsent::create([
@@ -299,13 +271,11 @@ describe('Consent events', function () {
             'source' => 'user_request',
         ]);
 
-        Event::assertDispatched(ConsentRevoked::class, function (ConsentRevoked $event) {
-            return $event->level === 'party'
-                && $event->purposeCategory === 'marketing';
-        });
+        Event::assertDispatched(ConsentRevoked::class, fn (ConsentRevoked $event): bool => $event->level === 'party'
+            && $event->purposeCategory === 'marketing');
     });
 
-    it('dispatches ConsentGranted when contact point consent is granted', function () {
+    it('dispatches ConsentGranted when contact point consent is granted', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -321,20 +291,18 @@ describe('Consent events', function () {
             'source' => 'web_form',
         ]);
 
-        Event::assertDispatched(ConsentGranted::class, function (ConsentGranted $event) {
-            return $event->level === 'contact_point'
-                && $event->purposeCategory === 'transactional';
-        });
+        Event::assertDispatched(ConsentGranted::class, fn (ConsentGranted $event): bool => $event->level === 'contact_point'
+            && $event->purposeCategory === 'transactional');
     });
 });
 
-describe('DNC events', function () {
-    beforeEach(function () {
+describe('DNC events', function (): void {
+    beforeEach(function (): void {
         $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
         $this->party = $this->user->party;
     });
 
-    it('dispatches DncRuleCreated when a DNC rule is created', function () {
+    it('dispatches DncRuleCreated when a DNC rule is created', function (): void {
         Event::fake([DncRuleCreated::class]);
 
         DoNotContact::create([
@@ -345,13 +313,11 @@ describe('DNC events', function () {
             'effective_at' => now(),
         ]);
 
-        Event::assertDispatched(DncRuleCreated::class, function (DncRuleCreated $event) {
-            return $event->scope === 'purpose'
-                && $event->party->id === $this->party->id;
-        });
+        Event::assertDispatched(DncRuleCreated::class, fn (DncRuleCreated $event): bool => $event->scope === 'purpose'
+            && $event->party->id === $this->party->id);
     });
 
-    it('dispatches DncRuleRemoved when a DNC rule is deleted', function () {
+    it('dispatches DncRuleRemoved when a DNC rule is deleted', function (): void {
         $dnc = DoNotContact::create([
             'party_id' => $this->party->id,
             'channel' => 'sms',
@@ -364,13 +330,11 @@ describe('DNC events', function () {
 
         $dnc->delete();
 
-        Event::assertDispatched(DncRuleRemoved::class, function (DncRuleRemoved $event) use ($dnc) {
-            return $event->dncRule->id === $dnc->id
-                && $event->scope === 'channel';
-        });
+        Event::assertDispatched(DncRuleRemoved::class, fn (DncRuleRemoved $event): bool => $event->dncRule->id === $dnc->id
+            && $event->scope === 'channel');
     });
 
-    it('determines correct scope for party-wide DNC', function () {
+    it('determines correct scope for party-wide DNC', function (): void {
         Event::fake([DncRuleCreated::class]);
 
         DoNotContact::create([
@@ -380,12 +344,10 @@ describe('DNC events', function () {
             'effective_at' => now(),
         ]);
 
-        Event::assertDispatched(DncRuleCreated::class, function (DncRuleCreated $event) {
-            return $event->scope === 'party';
-        });
+        Event::assertDispatched(DncRuleCreated::class, fn (DncRuleCreated $event): bool => $event->scope === 'party');
     });
 
-    it('determines correct scope for contact point DNC', function () {
+    it('determines correct scope for contact point DNC', function (): void {
         $contactPoint = $this->party->contactPoints()->create([
             'channel' => 'email',
             'value_raw' => 'test@example.com',
@@ -401,14 +363,12 @@ describe('DNC events', function () {
             'effective_at' => now(),
         ]);
 
-        Event::assertDispatched(DncRuleCreated::class, function (DncRuleCreated $event) {
-            return $event->scope === 'contact_point';
-        });
+        Event::assertDispatched(DncRuleCreated::class, fn (DncRuleCreated $event): bool => $event->scope === 'contact_point');
     });
 });
 
-describe('Resolver events', function () {
-    beforeEach(function () {
+describe('Resolver events', function (): void {
+    beforeEach(function (): void {
         $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
         $this->party = $this->user->party;
         $this->party->contactPoints()->create([
@@ -417,7 +377,7 @@ describe('Resolver events', function () {
         ]);
     });
 
-    it('dispatches ContactResolved when resolver is called', function () {
+    it('dispatches ContactResolved when resolver is called', function (): void {
         Event::fake([ContactResolved::class]);
 
         $resolver = app(RobinsonRyan\HeyYou\Contracts\ContactResolver::class);
@@ -429,55 +389,47 @@ describe('Resolver events', function () {
 
         $resolver->resolve($request);
 
-        Event::assertDispatched(ContactResolved::class, function (ContactResolved $event) {
-            return $event->request->purpose === 'general'
-                && $event->request->channel === 'email';
-        });
+        Event::assertDispatched(ContactResolved::class, fn (ContactResolved $event): bool => $event->request->purpose === 'general'
+            && $event->request->channel === 'email');
     });
 });
 
-describe('Address events', function () {
-    beforeEach(function () {
+describe('Address events', function (): void {
+    beforeEach(function (): void {
         $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
         $this->party = $this->user->party;
     });
 
-    it('dispatches AddressCreated when an address is created', function () {
+    it('dispatches AddressCreated when an address is created', function (): void {
         Event::fake([AddressCreated::class]);
 
         $address = Address::factory()->forParty($this->party)->create();
 
-        Event::assertDispatched(AddressCreated::class, function (AddressCreated $event) use ($address) {
-            return $event->address->id === $address->id
-                && $event->party->id === $this->party->id;
-        });
+        Event::assertDispatched(AddressCreated::class, fn (AddressCreated $event): bool => $event->address->id === $address->id
+            && $event->party->id === $this->party->id);
     });
 
-    it('dispatches AddressUpdated when an address is updated', function () {
+    it('dispatches AddressUpdated when an address is updated', function (): void {
         $address = Address::factory()->forParty($this->party)->create();
 
         Event::fake([AddressUpdated::class]);
 
         $address->update(['line1' => '456 New Street']);
 
-        Event::assertDispatched(AddressUpdated::class, function (AddressUpdated $event) {
-            return $event->changedAttributes['line1'] === '456 New Street';
-        });
+        Event::assertDispatched(AddressUpdated::class, fn (AddressUpdated $event): bool => $event->changedAttributes['line1'] === '456 New Street');
     });
 
-    it('dispatches AddressDeleted when an address is deleted', function () {
+    it('dispatches AddressDeleted when an address is deleted', function (): void {
         $address = Address::factory()->forParty($this->party)->create();
 
         Event::fake([AddressDeleted::class]);
 
         $address->delete();
 
-        Event::assertDispatched(AddressDeleted::class, function (AddressDeleted $event) use ($address) {
-            return $event->address->id === $address->id;
-        });
+        Event::assertDispatched(AddressDeleted::class, fn (AddressDeleted $event): bool => $event->address->id === $address->id);
     });
 
-    it('dispatches AddressRestored when an address is restored', function () {
+    it('dispatches AddressRestored when an address is restored', function (): void {
         $address = Address::factory()->forParty($this->party)->create();
         $address->delete();
 
@@ -485,12 +437,10 @@ describe('Address events', function () {
 
         $address->restore();
 
-        Event::assertDispatched(AddressRestored::class, function (AddressRestored $event) use ($address) {
-            return $event->address->id === $address->id;
-        });
+        Event::assertDispatched(AddressRestored::class, fn (AddressRestored $event): bool => $event->address->id === $address->id);
     });
 
-    it('dispatches AddressValidated when validation_status changes to verified', function () {
+    it('dispatches AddressValidated when validation_status changes to verified', function (): void {
         $address = Address::factory()->forParty($this->party)->create([
             'validation_status' => 'unverified',
         ]);
@@ -499,12 +449,10 @@ describe('Address events', function () {
 
         $address->update(['validation_status' => 'verified']);
 
-        Event::assertDispatched(AddressValidated::class, function (AddressValidated $event) use ($address) {
-            return $event->address->id === $address->id;
-        });
+        Event::assertDispatched(AddressValidated::class, fn (AddressValidated $event): bool => $event->address->id === $address->id);
     });
 
-    it('dispatches AddressValidationFailed when validation_status changes to invalid', function () {
+    it('dispatches AddressValidationFailed when validation_status changes to invalid', function (): void {
         $address = Address::factory()->forParty($this->party)->create([
             'validation_status' => 'unverified',
         ]);
@@ -513,21 +461,19 @@ describe('Address events', function () {
 
         $address->update(['validation_status' => 'invalid']);
 
-        Event::assertDispatched(AddressValidationFailed::class, function (AddressValidationFailed $event) use ($address) {
-            return $event->address->id === $address->id;
-        });
+        Event::assertDispatched(AddressValidationFailed::class, fn (AddressValidationFailed $event): bool => $event->address->id === $address->id);
     });
 });
 
-describe('Relationship events', function () {
-    beforeEach(function () {
+describe('Relationship events', function (): void {
+    beforeEach(function (): void {
         $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
         $this->company = Company::create(['legal_name' => 'Acme Corp']);
         $this->fromParty = $this->user->party;
         $this->toParty = $this->company->party;
     });
 
-    it('dispatches RelationshipCreated when a relationship is created', function () {
+    it('dispatches RelationshipCreated when a relationship is created', function (): void {
         Event::fake([RelationshipCreated::class]);
 
         $relationship = PartyRelationship::create([
@@ -536,14 +482,12 @@ describe('Relationship events', function () {
             'relationship_type' => 'employment',
         ]);
 
-        Event::assertDispatched(RelationshipCreated::class, function (RelationshipCreated $event) use ($relationship) {
-            return $event->relationship->id === $relationship->id
-                && $event->fromParty->id === $this->fromParty->id
-                && $event->toParty->id === $this->toParty->id;
-        });
+        Event::assertDispatched(RelationshipCreated::class, fn (RelationshipCreated $event): bool => $event->relationship->id === $relationship->id
+            && $event->fromParty->id === $this->fromParty->id
+            && $event->toParty->id === $this->toParty->id);
     });
 
-    it('dispatches RelationshipUpdated when a relationship is updated', function () {
+    it('dispatches RelationshipUpdated when a relationship is updated', function (): void {
         $relationship = PartyRelationship::create([
             'from_party_id' => $this->fromParty->id,
             'to_party_id' => $this->toParty->id,
@@ -554,12 +498,10 @@ describe('Relationship events', function () {
 
         $relationship->update(['label' => 'Senior Developer']);
 
-        Event::assertDispatched(RelationshipUpdated::class, function (RelationshipUpdated $event) {
-            return $event->changedAttributes['label'] === 'Senior Developer';
-        });
+        Event::assertDispatched(RelationshipUpdated::class, fn (RelationshipUpdated $event): bool => $event->changedAttributes['label'] === 'Senior Developer');
     });
 
-    it('dispatches RelationshipEnded when valid_to is set', function () {
+    it('dispatches RelationshipEnded when valid_to is set', function (): void {
         $relationship = PartyRelationship::create([
             'from_party_id' => $this->fromParty->id,
             'to_party_id' => $this->toParty->id,
@@ -570,12 +512,10 @@ describe('Relationship events', function () {
 
         $relationship->update(['valid_to' => now()]);
 
-        Event::assertDispatched(RelationshipEnded::class, function (RelationshipEnded $event) use ($relationship) {
-            return $event->relationship->id === $relationship->id;
-        });
+        Event::assertDispatched(RelationshipEnded::class, fn (RelationshipEnded $event): bool => $event->relationship->id === $relationship->id);
     });
 
-    it('dispatches RelationshipDeleted when a relationship is deleted', function () {
+    it('dispatches RelationshipDeleted when a relationship is deleted', function (): void {
         $relationship = PartyRelationship::create([
             'from_party_id' => $this->fromParty->id,
             'to_party_id' => $this->toParty->id,
@@ -586,21 +526,19 @@ describe('Relationship events', function () {
 
         $relationship->delete();
 
-        Event::assertDispatched(RelationshipDeleted::class, function (RelationshipDeleted $event) use ($relationship) {
-            return $event->relationship->id === $relationship->id;
-        });
+        Event::assertDispatched(RelationshipDeleted::class, fn (RelationshipDeleted $event): bool => $event->relationship->id === $relationship->id);
     });
 });
 
-describe('RoleAssignment events', function () {
-    beforeEach(function () {
+describe('RoleAssignment events', function (): void {
+    beforeEach(function (): void {
         $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
         $this->company = Company::create(['legal_name' => 'Acme Corp']);
         $this->party = $this->user->party;
         $this->scopeParty = $this->company->party;
     });
 
-    it('dispatches RoleAssignmentCreated when a role assignment is created', function () {
+    it('dispatches RoleAssignmentCreated when a role assignment is created', function (): void {
         Event::fake([RoleAssignmentCreated::class]);
 
         $roleAssignment = RoleAssignment::create([
@@ -609,14 +547,12 @@ describe('RoleAssignment events', function () {
             'role' => 'accounts_payable_contact',
         ]);
 
-        Event::assertDispatched(RoleAssignmentCreated::class, function (RoleAssignmentCreated $event) use ($roleAssignment) {
-            return $event->roleAssignment->id === $roleAssignment->id
-                && $event->party->id === $this->party->id
-                && $event->scopeParty->id === $this->scopeParty->id;
-        });
+        Event::assertDispatched(RoleAssignmentCreated::class, fn (RoleAssignmentCreated $event): bool => $event->roleAssignment->id === $roleAssignment->id
+            && $event->party->id === $this->party->id
+            && $event->scopeParty->id === $this->scopeParty->id);
     });
 
-    it('dispatches RoleAssignmentUpdated when a role assignment is updated', function () {
+    it('dispatches RoleAssignmentUpdated when a role assignment is updated', function (): void {
         $roleAssignment = RoleAssignment::create([
             'party_id' => $this->party->id,
             'scope_party_id' => $this->scopeParty->id,
@@ -627,12 +563,10 @@ describe('RoleAssignment events', function () {
 
         $roleAssignment->update(['priority' => 5]);
 
-        Event::assertDispatched(RoleAssignmentUpdated::class, function (RoleAssignmentUpdated $event) {
-            return $event->changedAttributes['priority'] === 5;
-        });
+        Event::assertDispatched(RoleAssignmentUpdated::class, fn (RoleAssignmentUpdated $event): bool => $event->changedAttributes['priority'] === 5);
     });
 
-    it('dispatches RoleAssignmentExpired when valid_to is set', function () {
+    it('dispatches RoleAssignmentExpired when valid_to is set', function (): void {
         $roleAssignment = RoleAssignment::create([
             'party_id' => $this->party->id,
             'scope_party_id' => $this->scopeParty->id,
@@ -643,12 +577,10 @@ describe('RoleAssignment events', function () {
 
         $roleAssignment->update(['valid_to' => now()]);
 
-        Event::assertDispatched(RoleAssignmentExpired::class, function (RoleAssignmentExpired $event) use ($roleAssignment) {
-            return $event->roleAssignment->id === $roleAssignment->id;
-        });
+        Event::assertDispatched(RoleAssignmentExpired::class, fn (RoleAssignmentExpired $event): bool => $event->roleAssignment->id === $roleAssignment->id);
     });
 
-    it('dispatches RoleAssignmentDeleted when a role assignment is deleted', function () {
+    it('dispatches RoleAssignmentDeleted when a role assignment is deleted', function (): void {
         $roleAssignment = RoleAssignment::create([
             'party_id' => $this->party->id,
             'scope_party_id' => $this->scopeParty->id,
@@ -659,8 +591,6 @@ describe('RoleAssignment events', function () {
 
         $roleAssignment->delete();
 
-        Event::assertDispatched(RoleAssignmentDeleted::class, function (RoleAssignmentDeleted $event) use ($roleAssignment) {
-            return $event->roleAssignment->id === $roleAssignment->id;
-        });
+        Event::assertDispatched(RoleAssignmentDeleted::class, fn (RoleAssignmentDeleted $event): bool => $event->roleAssignment->id === $roleAssignment->id);
     });
 });

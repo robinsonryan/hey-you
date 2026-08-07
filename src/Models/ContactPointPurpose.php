@@ -29,7 +29,7 @@ final class ContactPointPurpose extends Model
 
     protected static function booted(): void
     {
-        self::created(function (ContactPointPurpose $purpose) {
+        self::created(function (ContactPointPurpose $purpose): void {
             app(EventDispatcher::class)->dispatch(new ContactPointPurposeAttached(
                 $purpose->contactPoint,
                 $purpose->purpose,
@@ -40,7 +40,7 @@ final class ContactPointPurpose extends Model
             ));
         });
 
-        self::deleted(function (ContactPointPurpose $purpose) {
+        self::deleted(function (ContactPointPurpose $purpose): void {
             app(EventDispatcher::class)->dispatch(new ContactPointPurposeDetached(
                 $purpose->contactPoint,
                 $purpose->purpose,

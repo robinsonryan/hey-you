@@ -9,13 +9,13 @@ use RobinsonRyan\HeyYou\Resolver\DefaultContactResolver;
 use RobinsonRyan\HeyYou\Resolver\ResolverRequest;
 use RobinsonRyan\HeyYou\Resolver\ResolverResult;
 
-it('implements ContactResolver contract', function () {
+it('implements ContactResolver contract', function (): void {
     $resolver = app(ContactResolver::class);
 
     expect($resolver)->toBeInstanceOf(DefaultContactResolver::class);
 });
 
-it('returns ResolverResult from resolve method', function () {
+it('returns ResolverResult from resolve method', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -34,7 +34,7 @@ it('returns ResolverResult from resolve method', function () {
     expect($result)->toBeInstanceOf(ResolverResult::class);
 });
 
-it('returns empty result when no contact points exist', function () {
+it('returns empty result when no contact points exist', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -54,7 +54,7 @@ it('returns empty result when no contact points exist', function () {
         ->and($result->best())->toBeNull();
 });
 
-it('returns empty result when no matching channel exists', function () {
+it('returns empty result when no matching channel exists', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -80,7 +80,7 @@ it('returns empty result when no matching channel exists', function () {
     expect($result->isEmpty())->toBeTrue();
 });
 
-it('populates match with correct owning party', function () {
+it('populates match with correct owning party', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),
@@ -106,7 +106,7 @@ it('populates match with correct owning party', function () {
     expect($result->best()->owningParty->id)->toBe($party->id);
 });
 
-it('assigns sequential ranks to matches', function () {
+it('assigns sequential ranks to matches', function (): void {
     $party = Party::create([
         'partyable_type' => 'User',
         'partyable_id' => fakePartyableId(),

@@ -6,7 +6,7 @@ use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\Company;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-it('creates a party when a contactable model is created', function () {
+it('creates a party when a contactable model is created', function (): void {
     $user = User::create([
         'name' => 'John Doe',
         'email' => 'john@example.com',
@@ -17,7 +17,7 @@ it('creates a party when a contactable model is created', function () {
     expect($user->party->display_name_cached)->toBe('John Doe');
 });
 
-it('sets the correct partyable morph type and id', function () {
+it('sets the correct partyable morph type and id', function (): void {
     $user = User::create([
         'name' => 'John Doe',
         'email' => 'john@example.com',
@@ -27,7 +27,7 @@ it('sets the correct partyable morph type and id', function () {
     expect($user->party->partyable_id)->toBe($user->id);
 });
 
-it('uses custom display name from getDisplayNameForParty', function () {
+it('uses custom display name from getDisplayNameForParty', function (): void {
     $company = Company::create([
         'legal_name' => 'Acme Corporation Inc.',
     ]);
@@ -35,7 +35,7 @@ it('uses custom display name from getDisplayNameForParty', function () {
     expect($company->party->display_name_cached)->toBe('Acme Corporation Inc.');
 });
 
-it('updates party display name when model is updated', function () {
+it('updates party display name when model is updated', function (): void {
     $user = User::create([
         'name' => 'John Doe',
         'email' => 'john@example.com',
@@ -50,7 +50,7 @@ it('updates party display name when model is updated', function () {
     expect($user->party->display_name_cached)->toBe('Jane Doe');
 });
 
-it('does not update party if display name unchanged', function () {
+it('does not update party if display name unchanged', function (): void {
     $user = User::create([
         'name' => 'John Doe',
         'email' => 'john@example.com',
@@ -67,7 +67,7 @@ it('does not update party if display name unchanged', function () {
     expect($user->party->display_name_cached)->toBe('John Doe');
 });
 
-it('soft deletes party when model is deleted', function () {
+it('soft deletes party when model is deleted', function (): void {
     $user = User::create([
         'name' => 'John Doe',
         'email' => 'john@example.com',
@@ -81,7 +81,7 @@ it('soft deletes party when model is deleted', function () {
     expect(Party::withTrashed()->find($partyId))->not->toBeNull();
 });
 
-it('can access partyable from party', function () {
+it('can access partyable from party', function (): void {
     $user = User::create([
         'name' => 'John Doe',
         'email' => 'john@example.com',
@@ -95,7 +95,7 @@ it('can access partyable from party', function () {
     expect($partyable->name)->toBe('John Doe');
 });
 
-it('creates unique parties for different models', function () {
+it('creates unique parties for different models', function (): void {
     $user = User::create([
         'name' => 'John Doe',
         'email' => 'john@example.com',

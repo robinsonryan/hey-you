@@ -9,11 +9,11 @@ use RobinsonRyan\HeyYou\Models\ContactPointConsent;
 use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Models\PartyConsent;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->checker = new DefaultConsentChecker;
 });
 
-it('returns allowed with level none when no consent records exist', function () {
+it('returns allowed with level none when no consent records exist', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -35,7 +35,7 @@ it('returns allowed with level none when no consent records exist', function () 
     expect($result->capturedAt)->toBeNull();
 });
 
-it('returns allowed when contact point has opted in', function () {
+it('returns allowed when contact point has opted in', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -67,7 +67,7 @@ it('returns allowed when contact point has opted in', function () {
     expect($result->capturedAt->toDateTimeString())->toBe($capturedAt->toDateTimeString());
 });
 
-it('returns denied when contact point has opted out', function () {
+it('returns denied when contact point has opted out', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -96,7 +96,7 @@ it('returns denied when contact point has opted out', function () {
     expect($result->status)->toBe('opted_out');
 });
 
-it('returns allowed when party has opted in and no contact point consent', function () {
+it('returns allowed when party has opted in and no contact point consent', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -128,7 +128,7 @@ it('returns allowed when party has opted in and no contact point consent', funct
     expect($result->status)->toBe('opted_in');
 });
 
-it('returns denied when party has opted out and no contact point consent', function () {
+it('returns denied when party has opted out and no contact point consent', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -158,7 +158,7 @@ it('returns denied when party has opted out and no contact point consent', funct
     expect($result->status)->toBe('opted_out');
 });
 
-it('prefers contact point consent over party consent (more specific wins)', function () {
+it('prefers contact point consent over party consent (more specific wins)', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -199,7 +199,7 @@ it('prefers contact point consent over party consent (more specific wins)', func
     expect($result->status)->toBe('opted_in');
 });
 
-it('uses most recent consent when multiple consents exist at same level', function () {
+it('uses most recent consent when multiple consents exist at same level', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -238,7 +238,7 @@ it('uses most recent consent when multiple consents exist at same level', functi
     expect($result->status)->toBe('opted_in');
 });
 
-it('prefers channel-specific party consent over generic party consent', function () {
+it('prefers channel-specific party consent over generic party consent', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -279,7 +279,7 @@ it('prefers channel-specific party consent over generic party consent', function
     expect($result->status)->toBe('opted_out');
 });
 
-it('ignores soft deleted consent records', function () {
+it('ignores soft deleted consent records', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),
@@ -310,7 +310,7 @@ it('ignores soft deleted consent records', function () {
     expect($result->level)->toBe('none');
 });
 
-it('only considers consent for the specified purpose category', function () {
+it('only considers consent for the specified purpose category', function (): void {
     $party = Party::create([
         'partyable_type' => 'App\\Models\\User',
         'partyable_id' => fakePartyableId(),

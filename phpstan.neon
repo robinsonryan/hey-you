@@ -8,4 +8,6 @@ parameters:
         # trait; without them PHPStan cannot analyse it (trait.unused).
         - tests/Fixtures
     level: 8
+    phpVersion: 80200
+    tmpDir: .phpstan.cache
     ignoreErrors: []

@@ -8,13 +8,13 @@ use RobinsonRyan\HeyYou\Models\DoNotContact;
 use RobinsonRyan\HeyYou\Models\Party;
 use RobinsonRyan\HeyYou\Tests\Fixtures\Models\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
     $this->party = $this->user->party;
 });
 
-describe('DncRuleCreated', function () {
-    it('contains the DNC rule, party, and scope', function () {
+describe('DncRuleCreated', function (): void {
+    it('contains the DNC rule, party, and scope', function (): void {
         $dncRule = DoNotContact::create([
             'party_id' => $this->party->id,
             'purpose' => 'marketing',
@@ -30,7 +30,7 @@ describe('DncRuleCreated', function () {
             ->and($event->scope)->toBe('purpose');
     });
 
-    it('handles party-wide DNC scope', function () {
+    it('handles party-wide DNC scope', function (): void {
         $dncRule = DoNotContact::create([
             'party_id' => $this->party->id,
             'reason' => 'Full DNC',
@@ -44,8 +44,8 @@ describe('DncRuleCreated', function () {
     });
 });
 
-describe('DncRuleRemoved', function () {
-    it('contains the DNC rule, party, and scope', function () {
+describe('DncRuleRemoved', function (): void {
+    it('contains the DNC rule, party, and scope', function (): void {
         $dncRule = DoNotContact::create([
             'party_id' => $this->party->id,
             'channel' => 'email',

@@ -5,31 +5,31 @@ declare(strict_types=1);
 use RobinsonRyan\HeyYou\Contracts\Registries\RegistryItem;
 use RobinsonRyan\HeyYou\Support\GenericRegistryItem;
 
-it('implements RegistryItem interface', function () {
+it('implements RegistryItem interface', function (): void {
     $item = new GenericRegistryItem('email', 'Email');
 
     expect($item)->toBeInstanceOf(RegistryItem::class);
 });
 
-it('returns the slug', function () {
+it('returns the slug', function (): void {
     $item = new GenericRegistryItem('email', 'Email');
 
     expect($item->slug())->toBe('email');
 });
 
-it('returns the name', function () {
+it('returns the name', function (): void {
     $item = new GenericRegistryItem('email', 'Email');
 
     expect($item->name())->toBe('Email');
 });
 
-it('returns metadata as empty array by default', function () {
+it('returns metadata as empty array by default', function (): void {
     $item = new GenericRegistryItem('email', 'Email');
 
     expect($item->metadata())->toBe([]);
 });
 
-it('returns provided metadata', function () {
+it('returns provided metadata', function (): void {
     $item = new GenericRegistryItem('email', 'Email', ['category' => 'electronic']);
 
     expect($item->metadata())->toBe(['category' => 'electronic']);

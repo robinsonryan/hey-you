@@ -6,15 +6,15 @@ namespace RobinsonRyan\HeyYou\Resolver;
 
 use RobinsonRyan\HeyYou\Models\Party;
 
-final class ResolverRequest
+final readonly class ResolverRequest
 {
     public function __construct(
-        public readonly Party $targetParty,
-        public readonly string $purpose,
-        public readonly string $channel,
-        public readonly ?Party $scopeParty = null,
-        public readonly ?ResolverConstraints $constraints = null,
-        public readonly int $limit = 10,
+        public Party $targetParty,
+        public string $purpose,
+        public string $channel,
+        public ?Party $scopeParty = null,
+        public ?ResolverConstraints $constraints = null,
+        public int $limit = 10,
     ) {}
 
     /**
