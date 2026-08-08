@@ -152,6 +152,54 @@ describe('markVerified', function (): void {
             ->and($newer->refresh()->status)->toBe(VerificationEvent::STATUS_VERIFIED);
     });
 
+    it('adopts a matching pending row and leaves the older same-method one open', function (): void {
+        Carbon::setTestNow('2026-08-08 12:00:00');
+        $older = $this->contactPoint->startVerification('code');
+
+        Carbon::setTestNow('2026-08-08 12:01:00');
+        $newer = $this->contactPoint->startVerification('code');
+
+        Carbon::setTestNow('2026-08-08 12:02:00');
+        $this->contactPoint->markVerified('code');
+
+        expect(verificationHistoryCount($this->contactPoint))->toBe(2)
+            ->and($older->refresh()->status)->toBe(VerificationEvent::STATUS_PENDING)
+            ->and($newer->refresh()->status)->toBe(VerificationEvent::STATUS_VERIFIED)
+            ->and($newer->method)->toBe('code');
+    });
+
+    it('does not adopt a pending row started under a different method', function (): void {
+        Carbon::setTestNow('2026-08-08 12:00:00');
+        $pending = $this->contactPoint->startVerification('link');
+
+        Carbon::setTestNow('2026-08-08 12:05:00');
+        $this->contactPoint->markVerified('manual');
+
+        // The link attempt is still outstanding; the manual override gets its own row.
+        expect(verificationHistoryCount($this->contactPoint))->toBe(2)
+            ->and($pending->refresh()->status)->toBe(VerificationEvent::STATUS_PENDING)
+            ->and($pending->method)->toBe('link')
+            ->and($pending->completed_at)->toBeNull();
+
+        $completed = verificationHistoryRows($this->contactPoint)->last();
+
+        // The row must agree with both the model and the dispatched event.
+        expect($completed->status)->toBe(VerificationEvent::STATUS_VERIFIED)
+            ->and($completed->method)->toBe('manual')
+            ->and($completed->completed_at->toDateTimeString())->toBe('2026-08-08 12:05:00')
+            ->and($this->contactPoint->fresh()->verification_method)->toBe('manual');
+    });
+
+    it('does not adopt a mismatched pending row on the implicit path either', function (): void {
+        $pending = $this->contactPoint->startVerification('link');
+
+        $this->contactPoint->update(['is_verified' => true, 'verification_method' => 'imported']);
+
+        expect(verificationHistoryCount($this->contactPoint))->toBe(2)
+            ->and($pending->refresh()->status)->toBe(VerificationEvent::STATUS_PENDING)
+            ->and(verificationHistoryRows($this->contactPoint)->last()->method)->toBe('imported');
+    });
+
     it('records a fresh row and event each time an already-verified point is re-verified', function (): void {
         Event::fake([ContactPointVerified::class]);
 
@@ -316,14 +364,98 @@ describe('markVerificationExpired', function (): void {
         expect(verificationHistoryRows($this->contactPoint)->last()->method)->toBe('unknown');
     });
 
+    it('clears verified_at and the expiry alongside the flag', function (): void {
+        Carbon::setTestNow('2026-01-01 12:00:00');
+        $this->contactPoint->markVerified('code', Carbon::parse('2026-02-01 12:00:00'));
+
+        Carbon::setTestNow('2026-03-01 12:00:00');
+        $this->contactPoint->markVerificationExpired();
+
+        $fresh = $this->contactPoint->fresh();
+
+        expect($fresh->is_verified)->toBeFalse()
+            ->and($fresh->verified_at)->toBeNull()
+            ->and($fresh->verification_expires_at)->toBeNull();
+
+        // The audit trail keeps what the live model gave up.
+        $row = verificationHistoryRows($this->contactPoint)->last();
+
+        expect($row->status)->toBe(VerificationEvent::STATUS_EXPIRED)
+            ->and($row->expires_at->toDateTimeString())->toBe('2026-02-01 12:00:00');
+    });
+
+    it('leaves no stale timestamps for a later implicit re-verify to publish', function (): void {
+        Carbon::setTestNow('2026-01-01 12:00:00');
+        $this->contactPoint->markVerified('code', Carbon::parse('2026-02-01 12:00:00'));
+
+        Carbon::setTestNow('2026-03-01 12:00:00');
+        $this->contactPoint->markVerificationExpired();
+
+        // Months later the host re-verifies through the implicit path.
+        Carbon::setTestNow('2026-08-08 12:00:00');
+        Event::fake([ContactPointVerified::class]);
+
+        $this->contactPoint->update(['is_verified' => true]);
+
+        Event::assertDispatched(
+            ContactPointVerified::class,
+            fn (ContactPointVerified $event): bool => $event->verifiedAt->toDateTimeString() === '2026-08-08 12:00:00',
+        );
+
+        $row = verificationHistoryRows($this->contactPoint)->last();
+
+        expect($row->status)->toBe(VerificationEvent::STATUS_VERIFIED)
+            ->and($row->completed_at->toDateTimeString())->toBe('2026-08-08 12:00:00')
+            ->and($row->expires_at)->toBeNull();
+
+        // Not left in the is_verified = true / isCurrentlyVerified() = false
+        // contradiction the stale expiry used to produce.
+        $fresh = $this->contactPoint->fresh();
+
+        expect($fresh->is_verified)->toBeTrue()
+            ->and($fresh->isCurrentlyVerified())->toBeTrue()
+            ->and($fresh->verification_expires_at)->toBeNull();
+    });
+
+    it('is a no-op on a contact point that was never verified', function (): void {
+        Event::fake([ContactPointVerificationExpired::class]);
+
+        $this->contactPoint->markVerificationExpired();
+
+        Event::assertNotDispatched(ContactPointVerificationExpired::class);
+        expect(verificationHistoryCount($this->contactPoint))->toBe(0)
+            ->and($this->contactPoint->fresh()->is_verified)->toBeFalse();
+    });
+
+    it('is a no-op when the verification has already been expired', function (): void {
+        Carbon::setTestNow('2026-01-01 12:00:00');
+        $this->contactPoint->markVerified('code');
+
+        Carbon::setTestNow('2026-03-01 12:00:00');
+        $this->contactPoint->markVerificationExpired();
+
+        Event::fake([ContactPointVerificationExpired::class]);
+
+        $this->contactPoint->markVerificationExpired();
+
+        Event::assertNotDispatched(ContactPointVerificationExpired::class);
+        expect(verificationHistoryCount($this->contactPoint))->toBe(2);
+    });
+
     it('still dispatches the event but writes nothing when history logging is disabled', function (): void {
+        // Expiry is a no-op on a point holding no verification, so the toggle needs
+        // a real transition to exercise. Disable logging first so markVerified()
+        // writes no row of its own.
         config()->set('heyyou.verification.log_history', false);
+        $this->contactPoint->markVerified('code');
+
         Event::fake([ContactPointVerificationExpired::class]);
 
         $this->contactPoint->markVerificationExpired();
 
         Event::assertDispatchedTimes(ContactPointVerificationExpired::class, 1);
-        expect(verificationHistoryCount($this->contactPoint))->toBe(0);
+        expect(verificationHistoryCount($this->contactPoint))->toBe(0)
+            ->and($this->contactPoint->fresh()->is_verified)->toBeFalse();
     });
 });
 

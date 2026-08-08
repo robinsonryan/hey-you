@@ -312,6 +312,8 @@ final class ContactPoint extends Model
      */
     public function markVerificationFailed(string $method, string $reason, array $evidence = []): void
     {
+        // Event first, then history — see recordVerified() for why the ordering is
+        // deliberate and why the package does not wrap the pair in a transaction.
         app(EventDispatcher::class)->dispatch(new ContactPointVerificationFailed(
             $this,
             $method,
@@ -340,15 +342,36 @@ final class ContactPoint extends Model
      *
      * Called by the host application when it decides a verification has aged out;
      * the package ships no scheduler for this (spec §1.2).
+     *
+     * A no-op on a contact point that holds no verification. Expiry is a
+     * transition *out of* verified, so with nothing to leave there is no state
+     * change, no event and no history row — an audit entry for a verification
+     * that never happened would be fiction. It does not throw, so a host sweeping
+     * for aged-out points can hand over whatever its query returns without
+     * pre-filtering.
      */
     public function markVerificationExpired(): void
     {
+        if (! $this->is_verified) {
+            return;
+        }
+
         $method = $this->verification_method ?? 'unknown';
         $expiredAt = $this->verification_expires_at;
 
+        // Clear the timestamps along with the flag. The history row written below
+        // snapshots both, so the audit trail keeps them; leaving them on the live
+        // model would mean it still asserts a verification it no longer holds, and
+        // the `updated` hook's fallbacks (`verified_at ?? now()`) would republish
+        // those stale values on a later implicit re-verify — dispatching a
+        // months-old verifiedAt and an already-past expiry.
         $this->is_verified = false;
+        $this->verified_at = null;
+        $this->verification_expires_at = null;
         $this->save();
 
+        // Event first, then history — see recordVerified() for why the ordering is
+        // deliberate and why the package does not wrap the pair in a transaction.
         app(EventDispatcher::class)->dispatch(new ContactPointVerificationExpired($this));
 
         if (! $this->shouldLogVerificationHistory()) {
@@ -373,6 +396,16 @@ final class ContactPoint extends Model
      * `updated` hook's implicit path. Keeping them in one method is what makes it
      * impossible to add a verified-path history write with no event, or an event
      * with no history write.
+     *
+     * Ordering is deliberate and not transactional. This is a library: the host
+     * application owns its transaction boundaries, and a package that opened its
+     * own transaction around a host-visible event would create worse problems
+     * than it solves (listeners running inside a transaction they cannot see,
+     * queued work committed before the enclosing unit of work). Dispatching first
+     * fixes the direction of the invariant these methods promise — a history row
+     * always implies its event was dispatched. The residual risk is the mirror
+     * case: if the insert throws, listeners have already reacted to an outcome
+     * with no audit row. A host that needs both halves atomic wraps the call.
      */
     private function recordVerified(string $method, Carbon $verifiedAt, ?Carbon $expiresAt): void
     {
@@ -386,8 +419,14 @@ final class ContactPoint extends Model
             return;
         }
 
+        // Only a pending row started under *this* method can be the attempt that
+        // just succeeded. Completing a `link` attempt because a `manual` override
+        // landed would leave the row's method contradicting both the model and the
+        // dispatched event — in the one subsystem whose job is the audit trail.
+        // A mismatch simply gets its own completed row; the pending row stays open.
         $pending = $this->verificationEvents()
             ->where('status', VerificationEvent::STATUS_PENDING)
+            ->where('method', $method)
             ->orderByDesc('initiated_at')
             ->orderByDesc('id')
             ->first();
@@ -395,6 +434,9 @@ final class ContactPoint extends Model
         if ($pending instanceof VerificationEvent) {
             $pending->update([
                 'status' => VerificationEvent::STATUS_VERIFIED,
+                // Redundant while adoption requires a matching method, and written
+                // anyway so the row cannot drift from the event if that ever changes.
+                'method' => $method,
                 'completed_at' => $verifiedAt,
                 'expires_at' => $expiresAt,
             ]);
