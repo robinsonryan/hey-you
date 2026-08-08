@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Finishes three features that were scaffolded and never wired: config keys and
+documented APIs that pointed at machinery nothing connected. As of this work no event
+class in the package lacks a dispatch site, and no config key is read by nothing —
+both verified mechanically.
+
 ### Added
 - **`Contactable` gains `contactPoints()` and `addresses()`.** `docs/spec.md` §3.2 has
   promised both since the package was designed, and the guides showed them in use —
