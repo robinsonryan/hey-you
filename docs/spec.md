@@ -2,6 +2,17 @@
 
 A Laravel package for modeling contactable entities, contact methods, and deterministic contact resolution.
 
+> **This is the original design specification, kept as a record of intent.** The
+> shipped package has moved on in places, so where this document and the task
+> guides disagree, the task guides win. Known divergences:
+>
+> | This spec says | What shipped |
+> |---|---|
+> | Namespace `Vendor\HeyYou` | `RobinsonRyan\HeyYou` |
+> | `AutoIncrementGenerator` is the default identifier strategy, `$table->id()` keys | Every table is UUID7 with a PostgreSQL `uuidv7()` column default, hardcoded in the migrations — see [Installation](installation.md#primary-keys) |
+> | Database-agnostic, migrations publishable so host apps can adjust column types | PostgreSQL 18+ only; `uuidv7()` cannot be expressed elsewhere |
+> | `Contactable` provides `contactPoints()` and `addresses()` | Only `party()` exists; reach both through it (`$user->party->contactPoints`). Tracked in `QUEUE.md` |
+
 ---
 
 ## 1. Overview

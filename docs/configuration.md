@@ -31,15 +31,16 @@ return [
     | Identifier Generator
     |--------------------------------------------------------------------------
     |
-    | The class responsible for generating primary keys for package models.
-    | Must implement \RobinsonRyan\HeyYou\Contracts\IdentifierGenerator.
+    | Supplies identifiers for the rare case where one is needed before the row
+    | reaches the database. Must implement
+    | \RobinsonRyan\HeyYou\Contracts\IdentifierGenerator.
     |
-    | Options:
-    | - AutoIncrementGenerator (default) - Standard auto-incrementing integers
-    | - Custom implementation for UUIDs, ULIDs, etc.
+    | Package tables always use PostgreSQL's native uuidv7() as the column
+    | default, written directly into the migrations — this setting does not
+    | change that.
     |
     */
-    'identifier_generator' => \RobinsonRyan\HeyYou\Support\AutoIncrementGenerator::class,
+    'identifier_generator' => \RobinsonRyan\HeyYou\Support\Uuid7Generator::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -220,16 +221,20 @@ All package tables are prefixed with this value. To disable:
 ### Identifier Generator
 
 ```php
-'identifier_generator' => \RobinsonRyan\HeyYou\Support\AutoIncrementGenerator::class,
+'identifier_generator' => \RobinsonRyan\HeyYou\Support\Uuid7Generator::class,
 ```
 
-Controls primary key generation. Create custom implementations for UUIDs:
+**This does not control primary key generation.** Every package table declares
+`$table->uuid('id')->primary()->default(DB::raw('uuidv7()'))` in its migration,
+so PostgreSQL assigns the key on INSERT regardless of what this is set to. The
+generator covers only the narrow case of needing an ID before the row exists —
+`Model::factory()->make()`, or a client-supplied identifier.
 
-```php
-'identifier_generator' => \App\Support\UuidGenerator::class,
-```
+The service provider binds this class to the `IdentifierGenerator` contract, but
+nothing in the package currently resolves that binding, so changing it has no
+effect today. See `QUEUE.md` for the open decision on wiring it up or retiring it.
 
-See [Installation Guide](installation.md#custom-identifier-strategy) for implementation details.
+See the [Installation Guide](installation.md#primary-keys) for the full key convention.
 
 ### Registries
 

@@ -5,38 +5,88 @@
 
 ## Queued
 
-### `$user->contactPoints` is documented everywhere but has never existed
+### `$user->contactPoints` and `$user->addresses` are documented but have never existed
 - **Added**: 2026-08-08 · surfaced while writing the integer-key consumer tests
-- **Tier**: SOLO
-- **Why deferred**: out of scope for the integer-key fix; needs a call on which way to
-  reconcile, and the release was already gated on two other items
-- **Context**: `docs/contact-points.md`, `docs/spec.md` (§ "Consumer models access
-  contact data directly via trait methods") and the old CLAUDE.md all show
-  `$user->contactPoints` / `$user->contactPoints()->where(...)`. The `Contactable`
-  trait only ever defined `party()` — calling it raises
-  `BadMethodCallException: Call to undefined method ...::contactPoints()`. Confirmed
-  against a real model, not read off the source.
-- **Decide**: add a `HasManyThrough` (consumer → party → contact points) to the trait
-  and keep the docs, or delete the claim from all three places. The spec treats it as
-  a headline affordance, which argues for adding it. CLAUDE.md now points readers at
-  `$user->party->contactPoints` in the meantime.
+- **Tier**: LIGHT if built, SOLO if the claim is withdrawn
+- **Why deferred**: needs a call on which way to reconcile — the docs promise an API
+  that the trait never had, and the two resolutions differ by roughly a day
+- **Context**: `Contactable` defines exactly one relation, `party()`. The docs promise
+  two more:
+  - `$user->contactPoints` / `$user->contactPoints()->where('channel', 'phone')->get()`
+    — `docs/contact-points.md` (7 mentions), `docs/spec.md` §3.2
+  - `$user->addresses` / `$company->addresses()->where('purpose', 'billing')->get()`
+    and `Company::with('addresses')` — `docs/addresses.md` §"Via Consumer Model"
 
-### `docs/installation.md` still claims auto-incrementing integer primary keys
-- **Added**: 2026-08-08 · same pass
+  Calling either raises `BadMethodCallException: Call to undefined method
+  ...::contactPoints()`. Confirmed against a live model while writing
+  `ContactableIntegerKeyTest`, not read off the source. CLAUDE.md and `docs/spec.md`
+  now point readers at `$user->party->contactPoints` in the meantime; the two doc
+  files above still make the bare claim, pending this decision.
+- **Decide**: build both relations, or delete the claim from `docs/contact-points.md`
+  and `docs/addresses.md`.
+- **Measured 2026-08-08** with a throwaway `hasManyThrough` probe against real
+  PostgreSQL (two consumer models, one UUID-keyed and one bigint-keyed), rather than
+  estimated from reading. What a plain `hasManyThrough(ContactPoint::class,
+  Party::class, 'partyable_id', 'party_id', $localKey, 'id')` does:
+  - ✅ Single-model read works on **both** key types — the outer key is a bound value,
+    and a lone bound integer coerces against varchar.
+  - ✅ `->where('heyyou_parties.partyable_type', static::class)` does land in the SQL,
+    so the morph-type constraint needs no special machinery. (An earlier note here
+    claimed otherwise; the probe disproved it.)
+  - ❌ **Eager loading** an integer-keyed consumer fails —
+    `whereIntegerInRaw` inlines `in (2)` past the binding layer.
+  - ❌ **`has()` / `whereHas()`** on an integer-keyed consumer fails — the correlated
+    comparison `legacy_accounts.id = heyyou_parties.partyable_id` is column-to-column,
+    so there is no binding to coerce.
+
+  The two failures are exactly two of the three that `PartyMorphOne` already solves,
+  so the fix is the same pair of overrides (`whereInMethod()`, plus a
+  `cast(... as varchar)` on the qualified parent key) hoisted into a shared concern
+  and applied to a `HasManyThrough` subclass.
+- **Cost**: *Build* ≈ half a day — one shared concern + one relation subclass in
+  `src/Relations/`, two trait methods, and tests covering both key types × both broken
+  paths × two relations, plus a morph-type collision case. *Withdraw* ≈ 15 minutes,
+  ~6 lines across two files, at the price of an affordance the spec calls headline.
+
+### `config('heyyou.identifier_generator')` is bound to nothing that reads it
+- **Added**: 2026-08-08 · found while correcting the identifier-strategy docs
 - **Tier**: SOLO
-- **Context**: the "Custom Identifier Strategy" section opens "By default, HeyYou uses
-  auto-incrementing integers for primary keys" and offers a `Str::uuid()` generator as
-  the upgrade path. Since `d1e1829` every package table has been UUID7 with a
-  PostgreSQL `uuidv7()` column default, and CLAUDE.md forbids exactly the pattern the
-  doc recommends. A reader following it lands in the failure mode the identifier
-  conventions exist to prevent.
-- **Decide**: rewrite the section around the `uuidv7()` default and describe what
-  `identifier_generator` actually still controls (pre-persist IDs via
-  `Uuid7Generator`), or drop it.
+- **Context**: `HeyYouServiceProvider::registerIdentifierGenerator()` binds the
+  configured class to the `IdentifierGenerator` contract, and `ServiceProviderTest`
+  asserts the binding resolves — but **nothing in the package ever resolves it**.
+  `columnDefinition()` has no caller at all (the migrations write
+  `$table->uuid('id')->primary()->default(DB::raw('uuidv7()'))` directly), and the one
+  caller of `generate()` — `PartyFactory` — instantiates `Uuid7Generator` by hand
+  rather than going through the container. Setting the config to
+  `AutoIncrementGenerator` therefore changes nothing, which is a worse failure than an
+  error: the knob turns and the machine ignores it.
+- **Decide**: wire the migrations through `columnDefinition()` so the contract is real,
+  or delete the config key, the contract, and `AutoIncrementGenerator` and keep
+  `Uuid7Generator` as a plain utility. Leaning toward deletion — the package mandates
+  PostgreSQL 18 and UUID7 everywhere, so a pluggable key strategy is a door into a room
+  that no longer exists. The docs now say plainly that the setting has no effect.
 
 ## Blocked
 
 ## Archive
+
+### `docs/installation.md` still claimed auto-incrementing integer primary keys
+- **Added**: 2026-08-08 · found while writing the integer-key consumer tests
+- **Tier**: SOLO
+- **Context**: the "Custom Identifier Strategy" section opened "By default, HeyYou uses
+  auto-incrementing integers for primary keys" and offered a `Str::uuid()` generator as
+  the upgrade path. Since `d1e1829` every package table has been UUID7 with a
+  PostgreSQL `uuidv7()` column default, and CLAUDE.md forbids exactly the pattern the
+  doc recommended. A reader following it landed in the failure mode the identifier
+  conventions exist to prevent.
+- **Done**: 2026-08-08 · the drift was in three files, not one. `docs/installation.md`
+  §"Custom Identifier Strategy" is now §"Primary Keys", describing the `uuidv7()`
+  default, why `$incrementing = true` is correct, why `HasUuids` is not, and the narrow
+  pre-persist role `Uuid7Generator` actually plays. `docs/configuration.md` named
+  `AutoIncrementGenerator` as the default in two places (both corrected, both now state
+  the setting does not control primary keys). `docs/spec.md` is the original design
+  document — namespace `Vendor\HeyYou`, database-agnostic, `$table->id()` keys — so it
+  carries a divergence table at the top rather than a rewrite.
 
 ### Contactable consumers with integer primary keys cannot use this package on PostgreSQL (H2)
 - **Added**: 2026-08-07 · found while widening the constraint matrix (branch `chore/pest5-phpunit13-php84-matrix`)
