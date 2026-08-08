@@ -35,10 +35,21 @@ return new class extends Migration
             $table->string('name');
             $table->timestamps();
         });
+
+        // A second bigint-keyed consumer. Two such tables both count from 1, so
+        // a row in each can share a key value — and therefore share a
+        // `heyyou_parties.partyable_id` string. That collision is what makes the
+        // `partyable_type` constraint on the consumer relations load-bearing.
+        Schema::create('legacy_vendors', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('legacy_vendors');
         Schema::dropIfExists('legacy_accounts');
         Schema::dropIfExists('companies');
         Schema::dropIfExists('users');
