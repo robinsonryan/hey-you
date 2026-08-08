@@ -10,8 +10,9 @@ A Laravel package for modeling contactable entities, contact methods, and determ
 > |---|---|
 > | Namespace `Vendor\HeyYou` | `RobinsonRyan\HeyYou` |
 > | `AutoIncrementGenerator` is the default identifier strategy, `$table->id()` keys | Every table is UUID7 with a PostgreSQL `uuidv7()` column default, hardcoded in the migrations — see [Installation](installation.md#primary-keys) |
+> | §2.2 and §11.1: identifier columns use a configurable `IdentifierGenerator` | The contract is **retired**. It governed nothing — the migrations never consulted it — and genuine pluggability is ruled out by the PostgreSQL-only decision above |
 > | Database-agnostic, migrations publishable so host apps can adjust column types | PostgreSQL 18+ only; `uuidv7()` cannot be expressed elsewhere |
-> | `Contactable` provides `contactPoints()` and `addresses()` | Only `party()` exists; reach both through it (`$user->party->contactPoints`). Tracked in `QUEUE.md` |
+> | §4.4: verification history is written when `log_history` is true | True as of 2026-08-08. It was scaffolded and unwired for a long stretch — the table and model existed, nothing wrote to them. Use the `ContactPoint` intent methods, not hand-written rows |
 
 ---
 

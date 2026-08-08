@@ -266,8 +266,8 @@ See [Registries Guide](registries.md) for implementation details.
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `log_history` | bool | Whether to log verification events to the `verification_events` table |
-| `default_expiration_days` | int\|null | Default expiration for verifications (null = never expires) |
+| `log_history` | bool | Whether verification paths write rows to the `verification_events` table. Events still dispatch when this is `false` — only the recording stops. |
+| `default_expiration_days` | int\|null | Expiry applied by `markVerified()` **when no explicit expiry is passed**. `null` or a non-positive value means never expires. Does not retrofit onto direct attribute writes. |
 
 ### Event Dispatcher
 

@@ -27,15 +27,15 @@ build was not abandoned mid-way. These three are the whole gap.
 
 | ID | Requirement (source) | Implementation | Tests | Status |
 |---|---|---|---|---|
-| R1 | `Contactable` provides `contactPoints(): HasManyThrough` (spec §3.2; `docs/contact-points.md`) | M1 | M1 | pending |
-| R2 | `Contactable` provides `addresses(): HasManyThrough` (spec §3.2; `docs/addresses.md` "Via Consumer Model") | M1 | M1 | pending |
-| R3 | Both relations constrain `partyable_type` — a `User` and a `Company` sharing a key value must not read each other's rows | M1 | M1 | pending |
-| R4 | Both relations work for integer-keyed consumers on eager load and `has()`/`whereHas()` (the two paths measured broken 2026-08-08) | M1 | M1 | pending |
-| R5 | `verification.log_history` enables/disables verification event logging (spec §4.4) | M3 | M3 | pending |
-| R6 | A `VerificationEvent` row records status/method/evidence/initiated_at/completed_at/expires_at (spec §4.4 column table) | M3 | M3 | pending |
-| R7 | `ContactPointVerificationFailed` and `ContactPointVerificationExpired` are reachable — currently the only two event classes in the package with no dispatch site | M3 | M3 | pending |
-| R8 | `verification.default_expiration_days` has a defined effect or does not exist (not in spec; currently inert) | M3 | M3 | pending |
-| R9 | `identifier_generator` either governs identifier columns (spec §11.1) or is retired — it must not remain a config key that silently does nothing | M2 | M2 | pending |
+| R1 | `Contactable` provides `contactPoints(): HasManyThrough` (spec §3.2; `docs/contact-points.md`) | M1 | M1 | done — `Contactable::contactPoints()`, `PartyHasManyThrough` |
+| R2 | `Contactable` provides `addresses(): HasManyThrough` (spec §3.2; `docs/addresses.md` "Via Consumer Model") | M1 | M1 | done — `Contactable::addresses()` |
+| R3 | Both relations constrain `partyable_type` — a `User` and a `Company` sharing a key value must not read each other's rows | M1 | M1 | done — constrained in `addConstraints()`; mutation kills 5 tests |
+| R4 | Both relations work for integer-keyed consumers on eager load and `has()`/`whereHas()` (the two paths measured broken 2026-08-08) | M1 | M1 | done — plus a native-`uuid` case the brief did not predict |
+| R5 | `verification.log_history` enables/disables verification event logging (spec §4.4) | M3 | M3 | done — both settings tested; events still fire when logging is off |
+| R6 | A `VerificationEvent` row records status/method/evidence/initiated_at/completed_at/expires_at (spec §4.4 column table) | M3 | M3 | done |
+| R7 | `ContactPointVerificationFailed` and `ContactPointVerificationExpired` are reachable — currently the only two event classes in the package with no dispatch site | M3 | M3 | done — both events now dispatched |
+| R8 | `verification.default_expiration_days` has a defined effect or does not exist (not in spec; currently inert) | M3 | M3 | done — applies only when no explicit expiry is passed |
+| R9 | `identifier_generator` either governs identifier columns (spec §11.1) or is retired — it must not remain a config key that silently does nothing | M2 | M2 | done — retired (deviation, recorded) |
 | N1 | **Non-goal:** the package does not become database-portable. PostgreSQL 18+ stays a hard requirement (`uuidv7()`). | — | — | by design |
 | N2 | **Non-goal:** consumer-side primary key strategy is not the package's business. Integer-keyed consumers are supported (v0.1.2); the package's own tables stay UUID7. | — | — | by design |
 | N3 | **Non-goal:** no verification *transport* (sending codes/links). Spec §1.2 — "not a messaging provider." The package records verification outcomes; the host app performs them. | — | — | by design |

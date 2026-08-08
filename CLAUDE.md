@@ -208,18 +208,34 @@ class User extends Model
 
 // Party is auto-created when consumer is created
 $user = User::create(['name' => 'John']);
-$user->party; // Party instance
-$user->party->contactPoints; // HasMany of contact points
+$user->party;          // Party instance
+$user->contactPoints;  // HasManyThrough, hopping the party
+$user->addresses;      // HasManyThrough, hopping the party
 ```
 
-The trait supplies exactly one relation, `party()`. A consumer-level
-`contactPoints()` shortcut is described in `docs/` and `docs/spec.md` but has
-never existed — see QUEUE.md. Reach contact points through the party.
+The trait supplies three relations. All of them go through custom relation
+classes in `src/Relations/`, never plain `morphOne`/`hasManyThrough`:
 
-`party()` returns a `PartyMorphOne` (`src/Relations/PartyMorphOne.php`) rather
-than a plain `morphOne`, so consumers on an auto-incrementing integer key work
-against the `varchar` `partyable_id` column — PostgreSQL has no implicit
-`bigint`/`character varying` cast [T: tests/Unit/Traits/ContactableIntegerKeyTest.php].
+| Method | Class |
+|---|---|
+| `party()` | `PartyMorphOne` |
+| `contactPoints()`, `addresses()` | `PartyHasManyThrough` |
+
+Two reasons they are not the stock relations, and both are load-bearing:
+
+1. **`partyable_id` is a `varchar`**, because the package's own keys are UUID7.
+   PostgreSQL will not compare it to a consumer's `bigint` key — nor to a native
+   `uuid` key, which is the trap: `getKeyType()` reports `'string'` for a `uuid`
+   column exactly as for a `varchar` one, so "the key is a string in PHP" is not
+   the same question as "PostgreSQL will compare these two column types." Both
+   sides are coerced via `Relations\Concerns\CoercesConsumerKeyToText` — bound
+   values stringified, correlated columns wrapped in `cast(... as varchar)`
+   [T: tests/Unit/Traits/ContactableIntegerKeyTest.php].
+2. **`PartyHasManyThrough` constrains `partyable_type` in `addConstraints()`**,
+   not at the call site. Two integer-keyed consumer types both start at id 1, so
+   without it a `User` reads a `Company`'s contact points. Putting it in the
+   relation means no future caller can forget it
+   [T: tests/Unit/Traits/ContactableRelationsTest.php].
 
 #### 2. Contact Points with Normalization
 ```php

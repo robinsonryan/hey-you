@@ -5,70 +5,94 @@
 
 ## Queued
 
-### `$user->contactPoints` and `$user->addresses` are documented but have never existed
-- **Added**: 2026-08-08 · surfaced while writing the integer-key consumer tests
-- **Tier**: LIGHT if built, SOLO if the claim is withdrawn
-- **Why deferred**: needs a call on which way to reconcile — the docs promise an API
-  that the trait never had, and the two resolutions differ by roughly a day
-- **Context**: `Contactable` defines exactly one relation, `party()`. The docs promise
-  two more:
-  - `$user->contactPoints` / `$user->contactPoints()->where('channel', 'phone')->get()`
-    — `docs/contact-points.md` (7 mentions), `docs/spec.md` §3.2
-  - `$user->addresses` / `$company->addresses()->where('purpose', 'billing')->get()`
-    and `Company::with('addresses')` — `docs/addresses.md` §"Via Consumer Model"
-
-  Calling either raises `BadMethodCallException: Call to undefined method
-  ...::contactPoints()`. Confirmed against a live model while writing
-  `ContactableIntegerKeyTest`, not read off the source. CLAUDE.md and `docs/spec.md`
-  now point readers at `$user->party->contactPoints` in the meantime; the two doc
-  files above still make the bare claim, pending this decision.
-- **Decide**: build both relations, or delete the claim from `docs/contact-points.md`
-  and `docs/addresses.md`.
-- **Measured 2026-08-08** with a throwaway `hasManyThrough` probe against real
-  PostgreSQL (two consumer models, one UUID-keyed and one bigint-keyed), rather than
-  estimated from reading. What a plain `hasManyThrough(ContactPoint::class,
-  Party::class, 'partyable_id', 'party_id', $localKey, 'id')` does:
-  - ✅ Single-model read works on **both** key types — the outer key is a bound value,
-    and a lone bound integer coerces against varchar.
-  - ✅ `->where('heyyou_parties.partyable_type', static::class)` does land in the SQL,
-    so the morph-type constraint needs no special machinery. (An earlier note here
-    claimed otherwise; the probe disproved it.)
-  - ❌ **Eager loading** an integer-keyed consumer fails —
-    `whereIntegerInRaw` inlines `in (2)` past the binding layer.
-  - ❌ **`has()` / `whereHas()`** on an integer-keyed consumer fails — the correlated
-    comparison `legacy_accounts.id = heyyou_parties.partyable_id` is column-to-column,
-    so there is no binding to coerce.
-
-  The two failures are exactly two of the three that `PartyMorphOne` already solves,
-  so the fix is the same pair of overrides (`whereInMethod()`, plus a
-  `cast(... as varchar)` on the qualified parent key) hoisted into a shared concern
-  and applied to a `HasManyThrough` subclass.
-- **Cost**: *Build* ≈ half a day — one shared concern + one relation subclass in
-  `src/Relations/`, two trait methods, and tests covering both key types × both broken
-  paths × two relations, plus a morph-type collision case. *Withdraw* ≈ 15 minutes,
-  ~6 lines across two files, at the price of an affordance the spec calls headline.
-
-### `config('heyyou.identifier_generator')` is bound to nothing that reads it
-- **Added**: 2026-08-08 · found while correcting the identifier-strategy docs
+### Verification history can adopt an arbitrarily old pending attempt
+- **Added**: 2026-08-08 · narrowed but deliberately not closed during the half-wired-features build
 - **Tier**: SOLO
-- **Context**: `HeyYouServiceProvider::registerIdentifierGenerator()` binds the
-  configured class to the `IdentifierGenerator` contract, and `ServiceProviderTest`
-  asserts the binding resolves — but **nothing in the package ever resolves it**.
-  `columnDefinition()` has no caller at all (the migrations write
-  `$table->uuid('id')->primary()->default(DB::raw('uuidv7()'))` directly), and the one
-  caller of `generate()` — `PartyFactory` — instantiates `Uuid7Generator` by hand
-  rather than going through the container. Setting the config to
-  `AutoIncrementGenerator` therefore changes nothing, which is a worse failure than an
-  error: the knob turns and the machine ignores it.
-- **Decide**: wire the migrations through `columnDefinition()` so the contract is real,
-  or delete the config key, the contract, and `AutoIncrementGenerator` and keep
-  `Uuid7Generator` as a plain utility. Leaning toward deletion — the package mandates
-  PostgreSQL 18 and UUID7 everywhere, so a pluggable key strategy is a door into a room
-  that no longer exists. The docs now say plainly that the setting has no effect.
+- **Context**: `ContactPoint::markVerified()` completes an open `pending` row rather than
+  opening a second one. Review found it was adopting rows started under a *different*
+  method, so a `link` attempt could be completed by a `manual` verification and the
+  history row would then contradict both the model and the dispatched event. That is
+  fixed — adoption now requires a matching method.
+
+  What remains: because `markVerificationFailed()` deliberately leaves its pending row
+  open (the pending row models the *attempt*; failed rows are individual rejected
+  tries), a same-method pending row from years ago is still eligible for adoption. The
+  resulting row would carry a stale `initiated_at` with a current `completed_at`.
+- **Why deferred**: any cutoff is invented policy. The spec says nothing about how long
+  an attempt stays open, and picking "24 hours" or "30 days" in a package that cannot
+  know the host's verification flow is worse than leaving the seam visible.
+- **Decide**: a `verification.pending_ttl_hours` config key, or have
+  `markVerificationFailed()` close its pending row as failed rather than leaving it
+  open, or accept adoption-regardless-of-age as correct ("the attempt eventually
+  succeeded") and document it.
+
+### The implicit verification path publishes a `verified_at` it never persists
+- **Added**: 2026-08-08 · found by the remediation pass, outside its brief
+- **Tier**: SOLO
+- **Context**: when a host assigns `is_verified = true` and saves without setting
+  `verified_at`, the `updated` hook computes `verified_at ?? now()` for the dispatched
+  event and the history row — but never writes that value back to the column. The model
+  is left at `is_verified = true, verified_at = null` while the event and the audit row
+  both carry a concrete timestamp. Harmless today (`isCurrentlyVerified()` is true and
+  nothing contradicts), but it is the same species as the expiry-timestamp fiction that
+  was just fixed: a value published to the outside world that the row does not hold.
+- **Decide**: persist the derived `verified_at` back onto the model in the hook, or
+  document the implicit path as lossy and point people at `markVerified()`.
 
 ## Blocked
 
 ## Archive
+
+### `$user->contactPoints` and `$user->addresses` are documented but have never existed
+- **Added**: 2026-08-08 · surfaced while writing the integer-key consumer tests
+- **Tier**: LIGHT — built as module M1 of a FULL-tier build
+- **Context**: `docs/spec.md` §3.2 promised both; `docs/contact-points.md` and
+  `docs/addresses.md` showed them in use; `Contactable` defined only `party()`, so every
+  documented call raised `BadMethodCallException`. Confirmed against a live model.
+- **Done**: 2026-08-08 · `src/Relations/PartyHasManyThrough.php` plus
+  `src/Relations/Concerns/CoercesConsumerKeyToText.php`, hoisted out of `PartyMorphOne`
+  so both relation types share one copy of the key-coercion logic. Both relations
+  constrain `partyable_type` inside `addConstraints()` rather than at the call site, so
+  the isolation guarantee is structural. Proven by forcing two bigint-keyed consumers
+  onto id 4242 and asserting the collision before asserting isolation; deleting the
+  constraint turns five tests red, one a clean cross-tenant read. Every form the docs
+  already showed now works verbatim — no doc corrections were needed for those two files.
+- **Correction recorded**: the pre-build estimate here claimed a plain `hasManyThrough`
+  "cannot constrain `partyable_type`". A probe disproved it — a chained `->where()` does
+  survive into `has()` via `mergeConstraintsFrom`. The constraint moved into the relation
+  for defensibility, not necessity.
+
+### `config('heyyou.identifier_generator')` is bound to nothing that reads it
+- **Added**: 2026-08-08 · found while correcting the identifier-strategy docs
+- **Tier**: SOLO — built as the foundation commit of the same build
+- **Context**: the provider bound the configured class to the `IdentifierGenerator`
+  contract and a test asserted the binding resolved, but nothing ever resolved it.
+  `columnDefinition()` had no caller; the sole caller of `generate()` built
+  `Uuid7Generator` by hand. The knob turned and the machine ignored it.
+- **Done**: 2026-08-08 · retired. Contract, `AutoIncrementGenerator`, config key and
+  binding all removed; `Uuid7Generator` kept as a plain class for pre-persist IDs and
+  given the test coverage it never had. Recorded in the CHANGELOG as a **deviation from
+  spec §2.2 and §11.1** — genuine pluggability is assumed away in four places (12
+  `foreignUuid()` columns the contract has no method for, `ConfiguresIdentifiers`
+  hardcoding `$keyType = 'string'`, `partyable_id` being varchar, and the relation cast
+  keying off `getKeyType()`), and restoring it would mean re-opening database
+  portability that PostgreSQL-18-only `uuidv7()` rules out.
+
+### Verification history was scaffolded and never wired
+- **Added**: 2026-08-08 · found auditing the spec against `src/` for other half-built features
+- **Tier**: LIGHT — built as module M3 of the same build
+- **Context**: the `heyyou_verification_events` table, the `VerificationEvent` model,
+  `ContactPoint::verificationEvents()` and both `verification.*` config keys all existed.
+  Nothing ever wrote a row; the only code creating one was a test. Relatedly,
+  `ContactPointVerificationFailed` and `ContactPointVerificationExpired` were the only
+  two of the package's 35 event classes with no dispatch site anywhere.
+- **Done**: 2026-08-08 · four intent methods on `ContactPoint` — `startVerification()`,
+  `markVerified()`, `markVerificationFailed()`, `markVerificationExpired()`. Explicit
+  methods rather than hooks because a failure is not an attribute change, which is
+  precisely why those two events were unreachable. Both config keys now do something.
+  Review caught three defects, all fixed: cross-method pending adoption forging the audit
+  trail, expiry leaving stale timestamps that a later re-verify republished, and expiring
+  a never-verified point inventing history. Two follow-ups remain queued above.
 
 ### `docs/installation.md` still claimed auto-incrementing integer primary keys
 - **Added**: 2026-08-08 · found while writing the integer-key consumer tests

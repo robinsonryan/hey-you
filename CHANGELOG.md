@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`Contactable` gains `contactPoints()` and `addresses()`.** `docs/spec.md` §3.2 has
+  promised both since the package was designed, and the guides showed them in use —
+  `$user->contactPoints`, `$company->addresses()->where('purpose', 'billing')->get()`,
+  `Company::with('addresses')`. Neither existed; every one of those calls threw
+  `BadMethodCallException`. Both are now `HasManyThrough` relations hopping the
+  consumer's party, so they consume `Party::contactPoints()` / `Party::addresses()`
+  rather than opening a second query path.
+
+  The morph-type constraint lives inside `PartyHasManyThrough::addConstraints()`, not
+  at the call site: two integer-keyed consumer types both start at id 1, so their
+  `partyable_id` values collide and without the constraint one consumer reads the
+  other's rows. Putting it in the relation makes the guarantee structural instead of
+  a thing each caller has to remember. Proven by a test that forces two different
+  bigint-keyed consumers onto the same id and asserts the collision before asserting
+  isolation; deleting the constraint turns five tests red, one of them a clean
+  cross-tenant read.
+- **Verification history is written.** The `heyyou_verification_events` table, the
+  `VerificationEvent` model and `ContactPoint::verificationEvents()` have existed since
+  the schema was built, and nothing ever wrote a row — the config key said
+  `log_history => true` and no code read it. `ContactPoint` gains four intent methods:
+  `startVerification()`, `markVerified()`, `markVerificationFailed()` and
+  `markVerificationExpired()`. Each moves the model, dispatches its event and writes
+  the row as one act.
+
+  Explicit methods rather than model hooks because a verification *failure* is not an
+  attribute change, so no `updated` hook can observe one — which is exactly why
+  `ContactPointVerificationFailed` and `ContactPointVerificationExpired` had sat in the
+  package as the only two event classes with no dispatch site anywhere.
+
+  Assigning `is_verified` directly still works and still dispatches
+  `ContactPointVerified`, and now also records history. `verification.log_history` and
+  `verification.default_expiration_days` both genuinely do something for the first
+  time; when logging is off, events still dispatch — signalling is never gated by the
+  history switch.
+
+### Fixed
+- **`has('party')` and `whereHas('party')` no longer throw for UUID7-keyed consumers.**
+  v0.1.2 guarded `PartyMorphOne`'s column cast behind `getKeyType() !== 'string'`, on
+  the reasoning that a UUID consumer's key was already a string and needed no help.
+  It isn't the same question. Eloquent reports `getKeyType() === 'string'` for a native
+  PostgreSQL `uuid` column exactly as it does for a `varchar`, and `uuid` has no
+  implicit cast to `character varying` either — so
+  `User::query()->has('party')->count()` failed with
+  `SQLSTATE[42883] operator does not exist: uuid = character varying`, for precisely
+  the consumer shape this package documents as correct. The cast is now unconditional
+  in the column-to-column position. Ordinary reads still emit no cast, and the lookup
+  index on `(partyable_type, partyable_id)` stays usable because the cast falls on the
+  outer, correlated side of the `exists` subquery.
+
 ### Removed
 - **BREAKING: the `identifier_generator` contract is retired.** Gone:
   `RobinsonRyan\HeyYou\Contracts\IdentifierGenerator`,

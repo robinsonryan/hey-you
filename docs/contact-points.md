@@ -107,49 +107,77 @@ app(NormalizerRegistry::class)->register('instagram', new InstagramNormalizer())
 
 ## Verification
 
-Track whether contact points have been verified:
+HeyYou records verification outcomes; it never performs verification. Sending the
+code, the link or the carrier lookup is your application's job — the package is
+told what happened.
+
+Use the intent methods. Each one moves the model, dispatches its event, and
+writes the history row as a single act, so the three can never disagree:
 
 ```php
-// Mark as verified
-$contactPoint->update([
-    'is_verified' => true,
-    'verified_at' => now(),
-    'verification_method' => 'email_link', // code, link, imported, carrier_check, manual, oauth
-]);
+// Your app has just sent a magic link. Optional — records a pending attempt.
+$contactPoint->startVerification('link');
+
+// The recipient clicked it.
+$contactPoint->markVerified('link');
+
+// ...or with an explicit expiry.
+$contactPoint->markVerified('link', now()->addYear());
+
+// The code came back wrong, the carrier said the number is dead, etc.
+// Does not change is_verified — a failure is not an un-verification.
+$contactPoint->markVerificationFailed('code', 'Recipient entered the wrong code');
+
+// A verification has aged out. Clears the flag and its timestamps.
+// A no-op if the contact point holds no verification.
+$contactPoint->markVerificationExpired();
 
 // Check if currently verified (respects expiration)
 if ($contactPoint->isCurrentlyVerified()) {
     // Contact point is verified and not expired
 }
-
-// Set verification to expire
-$contactPoint->update([
-    'is_verified' => true,
-    'verified_at' => now(),
-    'verification_expires_at' => now()->addYear(),
-]);
 ```
 
-### Verification Events (Optional History)
+Methods: `code`, `link`, `imported`, `carrier_check`, `manual`, `oauth`.
 
-If `config('heyyou.verification.log_history')` is `true`, verification attempts are logged:
+`markVerified()` completes an open pending attempt **started under the same
+method**, rather than opening a second row. A verification under a different
+method gets its own row and leaves the pending one open — otherwise the history
+would claim an attempt succeeded that never did.
+
+Assigning the attributes directly still works and still dispatches
+`ContactPointVerified`:
 
 ```php
-use RobinsonRyan\HeyYou\Models\VerificationEvent;
-
-VerificationEvent::create([
-    'contact_point_id' => $contactPoint->id,
-    'status' => VerificationEvent::STATUS_PENDING,
-    'method' => 'email_link',
-    'initiated_at' => now(),
-]);
-
-// Later, when verified:
-$event->update([
-    'status' => VerificationEvent::STATUS_VERIFIED,
-    'completed_at' => now(),
-]);
+$contactPoint->update(['is_verified' => true, 'verified_at' => now()]);
 ```
+
+...but prefer the intent methods. The raw form cannot express failure or expiry
+at all — those are not attribute changes, so no model hook can observe them —
+and it is how a verification ends up in the history with no event, or an event
+with no history.
+
+> **Quiet and bulk writes bypass this entirely.** `saveQuietly()`,
+> `updateQuietly()`, and query-builder updates like
+> `ContactPoint::query()->update(['is_verified' => true])` fire no model events,
+> so they produce no dispatch *and* no history row. Both halves go missing
+> together, which keeps the record consistent — but a point verified that way has
+> no audit trail at all.
+
+### Verification history
+
+Every path above writes a `VerificationEvent` row when
+`config('heyyou.verification.log_history')` is `true` (the default). Set it to
+`false` and the events still dispatch — signalling is never gated by the history
+switch — but nothing is recorded.
+
+```php
+$contactPoint->verificationEvents; // pending / verified / failed / expired, over time
+```
+
+Do not write these rows by hand. A row created directly records history that no
+listener ever heard about, which is the exact inconsistency the intent methods
+exist to prevent.
 
 ## Purposes
 
