@@ -5,10 +5,44 @@
 
 ## Queued
 
-### Contactable consumers with integer primary keys cannot use this package on PostgreSQL
+### `$user->contactPoints` is documented everywhere but has never existed
+- **Added**: 2026-08-08 · surfaced while writing the integer-key consumer tests
+- **Tier**: SOLO
+- **Why deferred**: out of scope for the integer-key fix; needs a call on which way to
+  reconcile, and the release was already gated on two other items
+- **Context**: `docs/contact-points.md`, `docs/spec.md` (§ "Consumer models access
+  contact data directly via trait methods") and the old CLAUDE.md all show
+  `$user->contactPoints` / `$user->contactPoints()->where(...)`. The `Contactable`
+  trait only ever defined `party()` — calling it raises
+  `BadMethodCallException: Call to undefined method ...::contactPoints()`. Confirmed
+  against a real model, not read off the source.
+- **Decide**: add a `HasManyThrough` (consumer → party → contact points) to the trait
+  and keep the docs, or delete the claim from all three places. The spec treats it as
+  a headline affordance, which argues for adding it. CLAUDE.md now points readers at
+  `$user->party->contactPoints` in the meantime.
+
+### `docs/installation.md` still claims auto-incrementing integer primary keys
+- **Added**: 2026-08-08 · same pass
+- **Tier**: SOLO
+- **Context**: the "Custom Identifier Strategy" section opens "By default, HeyYou uses
+  auto-incrementing integers for primary keys" and offers a `Str::uuid()` generator as
+  the upgrade path. Since `d1e1829` every package table has been UUID7 with a
+  PostgreSQL `uuidv7()` column default, and CLAUDE.md forbids exactly the pattern the
+  doc recommends. A reader following it lands in the failure mode the identifier
+  conventions exist to prevent.
+- **Decide**: rewrite the section around the `uuidv7()` default and describe what
+  `identifier_generator` actually still controls (pre-persist IDs via
+  `Uuid7Generator`), or drop it.
+
+## Blocked
+
+## Archive
+
+### Contactable consumers with integer primary keys cannot use this package on PostgreSQL (H2)
 - **Added**: 2026-08-07 · found while widening the constraint matrix (branch `chore/pest5-phpunit13-php84-matrix`)
-- **Tier**: LIGHT
-- **Why deferred**: out of scope for a constraint-widening task; needs a design decision, not a patch
+- **Tier**: LIGHT (executed SOLO — one source file plus fixtures and tests)
+- **Why it was deferred**: out of scope for a constraint-widening task; needed a design
+  decision, not a patch
 - **Context**: `heyyou_parties.partyable_id` is `varchar`. A consumer model with a
   bigint PK binds `$model->getKey()` as an integer, and PostgreSQL refuses
   `varchar = integer` (`SQLSTATE[42883] operator does not exist`) — so the
@@ -22,21 +56,36 @@
   bigint-keyed consumer **against Postgres** so this cannot silently regress — the
   original bug survived only because SQLite coerced the mismatch. Prerequisite for the
   release tag; see ccstake `docs/plans/identity-unification-spec.md` §4 (H2).
+- **Done**: 2026-08-08 · `src/Relations/PartyMorphOne.php`, returned by
+  `Contactable::party()`. Three distinct leaks, not one — a probe fixture found them
+  before any fix was written, and only the first was the one predicted:
+  1. bound values (`getParentKey()`, and `getKeys()` for eager loads) → cast to string;
+  2. Eloquent optimises an eager load on an integer PK into `whereIntegerInRaw`, which
+     inlines bare integers into the SQL **past the binding layer** — `whereInMethod()`
+     is overridden to force the ordinary bound `whereIn`;
+  3. `has()` / `whereHas()` compare column-to-column with no binding at all —
+     `getQualifiedParentKeyName()` returns a `cast(... as varchar)` expression, and
+     only when `$parent->getKeyType() !== 'string'`, so UUID consumers' SQL is
+     untouched.
+  Covered by `tests/Unit/Traits/ContactableIntegerKeyTest.php` (8 cases against real
+  PostgreSQL, via a `LegacyAccount` fixture on `$table->id()`): create, fresh read,
+  eager load, `has()`, display-name sync, soft delete, reverse `partyable` morph, and
+  reaching contact points. Every one of the three failed before the fix.
 
-### Push the branch and cut a release tag
+### Push the branch and cut a release tag (H3)
 - **Added**: 2026-08-07 · ccstake adopts this package in its identity-unification build
 - **Tier**: SOLO
-- **Why deferred**: gated on the two items above
-- **Context**: `chore/pest5-phpunit13-php84-matrix` is green but unpushed and untagged, so
-  no consumer can see any of it. ccstake requires a tag (or an explicit `@dev` pin) before
-  build 1 can adopt hey-you. The only active consumer is **afwd** (locked v1.2.0; it has an
-  uncommitted QUEUE.md note warning about the `$incrementing` change). larquacious is the
-  other consumer and is being abandoned — skip it. nbss does not consume this package.
-  Land H1 and H2 first so the tag carries them (H3).
-
-## Blocked
-
-## Archive
+- **Why it was deferred**: gated on H1 and H2
+- **Context**: `chore/pest5-phpunit13-php84-matrix` was green but untagged, so no
+  consumer could see any of it. ccstake requires a tag (or an explicit `@dev` pin)
+  before build 1 can adopt hey-you. larquacious is the other consumer and is being
+  abandoned — skip it. nbss does not consume this package.
+- **Done**: 2026-08-08 · merged to `main` and tagged **v0.1.2** carrying H1, H2 and the
+  constraint matrix. Note the earlier retag (what was `v1.2.0` became `v0.1.2`); the
+  CHANGELOG's stale "v1.2.0" reference was corrected to v0.1.1, which is the tag that
+  actually narrowed php to `^8.3`. **afwd pins `^0.1.1` and will pick v0.1.2 up on its
+  next `composer update`** — it carries the `ConfiguresIdentifiers` `$incrementing`
+  change, which afwd's own QUEUE note already flags.
 
 ### Rector 2 proposes 61 files of closure `: void` return types (H1)
 - **Added**: 2026-08-07 · same session as the constraint-matrix work

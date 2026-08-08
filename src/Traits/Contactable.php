@@ -7,6 +7,7 @@ namespace RobinsonRyan\HeyYou\Traits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use RobinsonRyan\HeyYou\Models\Party;
+use RobinsonRyan\HeyYou\Relations\PartyMorphOne;
 
 /**
  * Trait for consumer models to integrate with HeyYou.
@@ -45,11 +46,26 @@ trait Contactable
     }
 
     /**
+     * The party record for this consumer.
+     *
+     * Built by hand rather than through `morphOne()` so the relation is a
+     * PartyMorphOne, which keeps the comparison against the varchar
+     * `partyable_id` column working for consumers on integer primary keys.
+     *
      * @return MorphOne<Party, $this>
      */
     public function party(): MorphOne
     {
-        return $this->morphOne(Party::class, 'partyable');
+        $party = $this->newRelatedInstance(Party::class);
+        $table = $party->getTable();
+
+        return new PartyMorphOne(
+            $party->newQuery(),
+            $this,
+            $table.'.partyable_type',
+            $table.'.partyable_id',
+            $this->getKeyName(),
+        );
     }
 
     /**

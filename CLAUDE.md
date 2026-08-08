@@ -118,12 +118,13 @@ composer quality
 ```bash
 ddev start           # Start environment (also creates the `testing` database)
 ddev test            # Run tests
-ddev quality         # Full quality checks (Pint --test, PHPStan level 8, Pest)
+ddev quality         # Full quality checks (Pint --test, PHPStan level 8, Rector --dry-run, Pest)
 ```
 
 `ddev start`'s post-start hook creates the `testing` Postgres database the suite
-needs. Rector is deliberately **not** in `composer quality` — run
-`composer refactor:check` separately.
+needs. `composer quality` runs `lint:check → analyze → refactor:check → test`, so
+Rector drift is gated rather than accumulating unseen
+[T: composer.json `scripts.quality`].
 
 ## Architecture
 
@@ -208,8 +209,17 @@ class User extends Model
 // Party is auto-created when consumer is created
 $user = User::create(['name' => 'John']);
 $user->party; // Party instance
-$user->contactPoints; // HasManyThrough to contact points
+$user->party->contactPoints; // HasMany of contact points
 ```
+
+The trait supplies exactly one relation, `party()`. A consumer-level
+`contactPoints()` shortcut is described in `docs/` and `docs/spec.md` but has
+never existed — see QUEUE.md. Reach contact points through the party.
+
+`party()` returns a `PartyMorphOne` (`src/Relations/PartyMorphOne.php`) rather
+than a plain `morphOne`, so consumers on an auto-incrementing integer key work
+against the `varchar` `partyable_id` column — PostgreSQL has no implicit
+`bigint`/`character varying` cast [T: tests/Unit/Traits/ContactableIntegerKeyTest.php].
 
 #### 2. Contact Points with Normalization
 ```php

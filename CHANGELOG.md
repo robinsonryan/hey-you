@@ -7,12 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-08-08
+
 ### Added
-- Initial package setup
+- **Consumer models on integer primary keys are supported.** `Contactable::party()`
+  now returns a `PartyMorphOne` (`src/Relations/PartyMorphOne.php`) instead of a plain
+  `morphOne`. `heyyou_parties.partyable_id` is a `varchar` because the package's own
+  models carry UUID7 keys; a consumer on an auto-incrementing `bigint` key bound its
+  key as an integer, and PostgreSQL refuses `character varying = bigint` outright
+  (`SQLSTATE[42883]`) rather than coercing it the way SQLite silently did. The new
+  relation coerces bound keys to text, forces the ordinary bound `whereIn` in place of
+  Eloquent's `whereIntegerInRaw` eager-load optimisation (which inlines bare integers
+  past the binding layer), and wraps the correlated column of an existence query in a
+  `cast(... as varchar)`. UUID-keyed consumers already have a string key, so their
+  queries are byte-for-byte unchanged.
 
 ### Changed
 - **Constraint matrix widened.** `php` `^8.3` → `^8.2` (restores PHP 8.2 support that
-  v1.2.0 dropped; Laravel 11/12 still support it), dev matrix now allows
+  v0.1.1 dropped; Laravel 11/12 still support it), dev matrix now allows
   `pestphp/pest` and `pestphp/pest-plugin-laravel` `^3|^4|^5` and pins
   `phpunit/phpunit` to `^11|^12|^13`. Laravel 11/12/13 and testbench 9/10/11 support
   is unchanged.

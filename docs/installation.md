@@ -82,6 +82,18 @@ class User extends Model
 }
 ```
 
+### Consumer models on integer primary keys
+
+The trait works whether your model's primary key is a UUID or an
+auto-incrementing integer. HeyYou's own tables use UUID7 keys, so
+`heyyou_parties.partyable_id` is a `varchar`; the trait coerces an integer
+consumer key to text on both sides of that comparison, because PostgreSQL will
+not compare `bigint` to `character varying` on its own.
+
+Nothing is required of you — `use Contactable;` on a `$table->id()` model and
+reads, eager loads, `has('party')` / `whereHas('party')`, and the automatic
+party lifecycle all behave the same as on a UUID-keyed model.
+
 ## Table Prefix
 
 By default, all tables use the `heyyou_` prefix. To change or disable:

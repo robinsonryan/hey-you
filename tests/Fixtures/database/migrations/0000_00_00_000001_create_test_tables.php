@@ -25,10 +25,21 @@ return new class extends Migration
             $table->string('legal_name');
             $table->timestamps();
         });
+
+        // A consumer that did NOT adopt the UUID7 convention: a plain
+        // auto-incrementing bigint key. PostgreSQL will not compare a bigint
+        // against the varchar `partyable_id` column, so this table exists to
+        // keep the Contactable trait honest for legacy consumers.
+        Schema::create('legacy_accounts', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('legacy_accounts');
         Schema::dropIfExists('companies');
         Schema::dropIfExists('users');
     }
