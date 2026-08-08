@@ -111,7 +111,7 @@ $best = $result->best();
 ## Requirements
 
 - PHP 8.2+
-- Laravel 11.x or 12.x
+- Laravel 12.x or 13.x
 
 ## Support
 

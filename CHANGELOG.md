@@ -91,6 +91,27 @@ both verified mechanically.
   out an identifier before the row exists (`Model::factory()->make()`, or a
   client-supplied ID) — and now carries the test coverage it never had, including
   that v7 values sort in creation order.
+- **BREAKING: Laravel 11 support is dropped.** The three `illuminate/*` requirements
+  narrow `^11.0|^12.0|^13.0` → `^12.0|^13.0`, and `orchestra/testbench` narrows
+  `^9.0|^10.0|^11.0` → `^10.0|^11.0` (testbench 9 *is* Laravel 11).
+
+  It was advertised and never once exercised. This package came closer than its
+  siblings — it allows `pestphp/pest ^3|^4|^5` and `phpunit/phpunit ^11|^12|^13`, so
+  Laravel 11 was reachable on paper via Pest 3 — but no local harness ever resolved
+  it. `--prefer-lowest` takes PHPUnit at 11.0.0, testbench 9 requires
+  `phpunit/phpunit ^11.0.1`, so testbench floats up to 10 and the floor run lands on
+  Laravel 12; every other run resolves the ceiling. Nothing in CI or in
+  `harness package-check` has ever put this package on Laravel 11, so the constraint
+  was a promise backed by no evidence. Declaring only what is tested is the point.
+
+  **Breaking for anyone pinned to Laravel 11** — such a consumer can no longer
+  install this package and must upgrade to Laravel 12 or 13. Everyone else sees no
+  change: the resolved dependency set is byte-for-byte identical (Laravel 13.24,
+  testbench 11.1, Pest 5.0.4, PHPUnit 13.2.6).
+
+  `pestphp/pest`, `pestphp/pest-plugin-laravel` and `phpunit/phpunit` keep their
+  full `^3|^4|^5` / `^11|^12|^13` ranges deliberately. Pest 3 and PHPUnit 11 both
+  pair with Laravel 12, so narrowing them would drop a rung that genuinely works.
 
 ## [0.1.2] - 2026-08-08
 
