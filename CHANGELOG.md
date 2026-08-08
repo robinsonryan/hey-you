@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **BREAKING: the `identifier_generator` contract is retired.** Gone:
+  `RobinsonRyan\HeyYou\Contracts\IdentifierGenerator`,
+  `RobinsonRyan\HeyYou\Support\AutoIncrementGenerator`, the
+  `heyyou.identifier_generator` config key, and the service provider binding.
+
+  Nothing behavioural changes with them. `d1e1829` replaced the contract-driven
+  column definitions with hardcoded `uuidv7()` DDL and left the apparatus standing:
+  `columnDefinition()` had no caller anywhere in the package, and the sole caller of
+  `generate()` — `PartyFactory` — builds `Uuid7Generator` by hand rather than
+  resolving the contract. Setting the config key to a different generator therefore
+  did nothing at all, which is worse than a missing knob: it turned, and the machine
+  ignored it. Every migration emits byte-for-byte the same DDL after this change as
+  before, because the migrations never consulted the contract.
+
+  This is a **deviation from spec §2.2 and §11.1** ("Identifier columns use the
+  configured generator"), recorded deliberately. Genuine pluggability is assumed away
+  in four places — the 12 `foreignUuid()` columns the contract has no method for,
+  `ConfiguresIdentifiers` hardcoding `$keyType = 'string'`, `partyable_id` being
+  varchar, and `PartyMorphOne`'s cast keying off `getKeyType()`. Restoring it would
+  mean re-opening database portability, and PostgreSQL 18+ is a hard requirement
+  because `uuidv7()` cannot be expressed anywhere else.
+
+  **Migration path:** delete `identifier_generator` from any published
+  `config/heyyou.php`, and drop any type-hint on the removed contract.
+  `Uuid7Generator` remains as a plain final class for the one job it does — handing
+  out an identifier before the row exists (`Model::factory()->make()`, or a
+  client-supplied ID) — and now carries the test coverage it never had, including
+  that v7 values sort in creation order.
+
 ## [0.1.2] - 2026-08-08
 
 ### Added
