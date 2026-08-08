@@ -18,14 +18,17 @@ use Illuminate\Database\Query\Expression as QueryExpression;
  * either, so `partyable_id = <consumer key>` fails outright with SQLSTATE[42883]
  * ("operator does not exist") rather than coercing the way SQLite did.
  *
- * There are two distinct halves to the fix, and they need different treatment:
+ * Bound values need no help from this trait: pdo_pgsql sends a binding as
+ * untyped text, which PostgreSQL resolves against the varchar column. What the
+ * relations do have to guarantee is that the value stays *bound* — Eloquent
+ * otherwise optimises an eager load on an integer key into `whereIntegerInRaw`,
+ * inlining bare integers into the SQL past the binding layer. Each relation
+ * overrides `whereInMethod()` to keep the ordinary bound `whereIn`.
  *
- * - **Bound values** — `where partyable_id = ?` and the `in (?, ?)` of an eager
- *   load. A string binding compares cleanly against a varchar column whatever
- *   the consumer's key type is, so these are stringified unconditionally.
- * - **Correlated columns** — the `whereColumn` of a `has()` / `whereHas()`
- *   existence query, where both sides are columns and there is no binding for
- *   PostgreSQL to coerce. Here the consumer's column is wrapped in a cast.
+ * That leaves the case this trait exists for: **correlated columns** — the
+ * `whereColumn` of a `has()` / `whereHas()` existence query, where both sides
+ * are columns and there is no binding for PostgreSQL to coerce. Here the
+ * consumer's column is wrapped in a cast.
  *
  * The cast is unconditional. An earlier version guarded it on
  * `getKeyType() !== 'string'`, on the assumption that the documented UUID7
@@ -39,28 +42,6 @@ use Illuminate\Database\Query\Expression as QueryExpression;
  */
 trait CoercesConsumerKeyToText
 {
-    /**
-     * A single consumer key as it should be bound against a varchar column.
-     */
-    protected function stringifyConsumerKey(mixed $value): ?string
-    {
-        return $value === null ? null : (string) $value;
-    }
-
-    /**
-     * A list of consumer keys as they should be bound into an `in (...)` list.
-     *
-     * @param  array<array-key, mixed>  $values
-     * @return array<array-key, string|null>
-     */
-    protected function stringifyConsumerKeys(array $values): array
-    {
-        return array_map(
-            fn (mixed $value): ?string => $this->stringifyConsumerKey($value),
-            $values,
-        );
-    }
-
     /**
      * A consumer's qualified key column, cast to text for a column-to-column
      * comparison against `partyable_id`.

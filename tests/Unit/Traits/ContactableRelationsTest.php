@@ -127,6 +127,26 @@ it('constrains existence queries on consumer contact points', function (): void 
         ->and($matched->first()->id)->toBe($withContact->id);
 });
 
+it('reads nothing once the consumer\'s party is soft deleted', function (): void {
+    $user = User::create(['name' => 'John Doe', 'email' => 'john@example.com']);
+
+    contactPointFor($user, 'john@example.com');
+    addressFor($user, '1 Vanishing Lane');
+
+    $user->party->delete();
+
+    // A soft-deleted party is gone as far as the consumer is concerned: the hop
+    // runs *through* heyyou_parties, so a trashed party must take its contact
+    // points and addresses with it rather than leaving them readable.
+    expect($user->contactPoints()->get())->toHaveCount(0)
+        ->and($user->addresses()->get())->toHaveCount(0)
+        // ...and the rows are still there. Opting the trashed party back in
+        // returns them, which pins the exclusion to the through-parent's
+        // soft-delete scope specifically — not to a missing row or a broken join.
+        ->and($user->contactPoints()->withTrashedParents()->get())->toHaveCount(1)
+        ->and($user->addresses()->withTrashedParents()->get())->toHaveCount(1);
+});
+
 // ---------------------------------------------------------------------------
 // R4 — integer-keyed consumers. `heyyou_parties.partyable_id` is a varchar and
 // PostgreSQL has no implicit bigint/varchar cast, so eager loading and
@@ -264,6 +284,41 @@ it('never leaks another consumer type\'s rows through an eager load on a key col
         ->and($vendors->first()->contactPoints->pluck('value_normalized')->all())
         ->toBe(['vendor@collide.example'])
         ->and($vendors->first()->addresses->pluck('line1')->all())->toBe(['1 Vendor Vale']);
+});
+
+it('never leaks another consumer type\'s rows through a deferred load on a key collision', function (): void {
+    collidingConsumers();
+
+    // `load()` is a separate code path from `with()`: the models are already
+    // hydrated, so the eager constraints are built from a collection rather than
+    // from the query being run.
+    $account = LegacyAccount::query()->firstOrFail();
+    $vendor = LegacyVendor::query()->firstOrFail();
+
+    $account->load(['contactPoints', 'addresses']);
+    $vendor->load(['contactPoints', 'addresses']);
+
+    expect($account->contactPoints->pluck('value_normalized')->all())
+        ->toBe(['account@collide.example'])
+        ->and($account->addresses->pluck('line1')->all())->toBe(['1 Account Alley'])
+        ->and($vendor->contactPoints->pluck('value_normalized')->all())
+        ->toBe(['vendor@collide.example'])
+        ->and($vendor->addresses->pluck('line1')->all())->toBe(['1 Vendor Vale']);
+});
+
+it('never counts another consumer type\'s rows through withCount on a key collision', function (): void {
+    collidingConsumers();
+
+    // withCount runs the relation as an aggregate subquery — a third path, and
+    // one that would silently return 2 for each consumer without the morph-type
+    // constraint rather than failing loudly.
+    $account = LegacyAccount::query()->withCount(['contactPoints', 'addresses'])->firstOrFail();
+    $vendor = LegacyVendor::query()->withCount(['contactPoints', 'addresses'])->firstOrFail();
+
+    expect((int) $account->contact_points_count)->toBe(1)
+        ->and((int) $account->addresses_count)->toBe(1)
+        ->and((int) $vendor->contact_points_count)->toBe(1)
+        ->and((int) $vendor->addresses_count)->toBe(1);
 });
 
 it('never leaks another consumer type\'s rows through whereHas on a key collision', function (): void {

@@ -78,22 +78,4 @@ final class PartyHasManyThrough extends HasManyThrough
     {
         return 'whereIn';
     }
-
-    /**
-     * The keys gathered for an eager load's `where partyable_id in (?, ?)`.
-     *
-     * These are far-parent (consumer) models. Laravel's own generics say
-     * otherwise — a through relation passes `Relation` the *through* parent, so
-     * the inherited signature reads as `array<int, Party>` — but
-     * `addEagerConstraints()` demonstrably hands `getKeys()` the consumers.
-     *
-     * @param  array<int, TDeclaringModel>  $models
-     * @param  string|null  $key
-     * @return array<array-key, string|null>
-     */
-    protected function getKeys(array $models, $key = null): array
-    {
-        // @phpstan-ignore argument.type
-        return $this->stringifyConsumerKeys(parent::getKeys($models, $key));
-    }
 }

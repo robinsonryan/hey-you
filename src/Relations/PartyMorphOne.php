@@ -15,8 +15,8 @@ use RobinsonRyan\HeyYou\Relations\Concerns\CoercesConsumerKeyToText;
  *
  * `heyyou_parties.partyable_id` is a varchar; the consumer's key is whatever the
  * consumer chose. CoercesConsumerKeyToText explains why PostgreSQL will not
- * bridge the two on its own — this class just wires the concern's helpers into
- * the three places a MorphOne touches the boundary.
+ * bridge the two on its own — this class wires that coercion into the places a
+ * MorphOne touches the boundary.
  *
  * @template TDeclaringModel of Model
  *
@@ -28,11 +28,18 @@ final class PartyMorphOne extends MorphOne
 
     /**
      * The parent key as bound into `where partyable_id = ?`, into eager-load
-     * dictionaries, and onto the foreign key of a party being created.
+     * dictionaries, and onto the `partyable_id` of a party being created.
+     *
+     * That last use is what makes this load-bearing rather than cosmetic: the
+     * value is written straight onto the new Party's attribute, so an
+     * integer-keyed consumer would otherwise hold an int in memory where the
+     * column — and every reader of it — has a string.
      */
     public function getParentKey(): ?string
     {
-        return $this->stringifyConsumerKey(parent::getParentKey());
+        $key = parent::getParentKey();
+
+        return $key === null ? null : (string) $key;
     }
 
     /**
@@ -59,17 +66,5 @@ final class PartyMorphOne extends MorphOne
     protected function whereInMethod(Model $model, $key): string
     {
         return 'whereIn';
-    }
-
-    /**
-     * The keys gathered for an eager load's `where partyable_id in (?, ?)`.
-     *
-     * @param  array<int, TDeclaringModel>  $models
-     * @param  string|null  $key
-     * @return array<array-key, string|null>
-     */
-    protected function getKeys(array $models, $key = null): array
-    {
-        return $this->stringifyConsumerKeys(parent::getKeys($models, $key));
     }
 }
