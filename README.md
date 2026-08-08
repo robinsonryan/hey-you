@@ -13,7 +13,7 @@ composer require robinsonryan/hey-you
 Publish the configuration file:
 
 ```bash
-php artisan vendor:publish --tag=hey-you-config
+php artisan vendor:publish --tag=heyyou-config
 ```
 
 ## Usage

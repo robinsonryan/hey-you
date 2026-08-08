@@ -150,12 +150,10 @@ $id = (new Uuid7Generator)->generate(); // '01935f2a-...'
 
 In ordinary CRUD you never need this; let PostgreSQL assign the key.
 
-> **On `config('heyyou.identifier_generator')`:** the service provider binds this
-> class to the `IdentifierGenerator` contract, but nothing in the package resolves
-> that binding — the migrations hardcode the `uuidv7()` column and `Uuid7Generator`
-> is instantiated directly where it is used. Pointing the config at a different
-> generator therefore changes nothing today. See `QUEUE.md` for the open decision
-> on whether to wire it up or retire it.
+`Uuid7Generator` is a plain final class, not a contract implementation. There is no
+`identifier_generator` config key and no pluggable generator contract — the
+`IdentifierGenerator` contract and `AutoIncrementGenerator` were retired because the
+migrations never consulted them. See `CHANGELOG.md` for the migration path.
 
 ## Verifying Installation
 
