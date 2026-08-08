@@ -59,7 +59,7 @@ $constraints = new ResolverConstraints(
     requireConsent: true,           // Only return contacts with consent
     consentCategory: 'marketing',   // Required when requireConsent = true
     allowFallback: true,            // Allow climbing scope hierarchy
-    excludeContactPointIds: [1, 2], // Exclude specific contact points
+    excludeContactPointIds: [$cp->id, $other->id], // UUID strings
 );
 ```
 
@@ -96,7 +96,7 @@ $match->normalizedValue;   // Normalized contact value
 $match->matchedPurpose;    // Purpose that matched (exact, parent, or null)
 $match->matchedRole;       // Role if found via role assignment
 $match->scopeParty;        // Scope this match came from
-$match->flags;             // Array: ['verified', 'consent_ok', 'is_primary']
+$match->flags;             // Array: ['verified' => bool, 'is_primary' => bool]
 $match->rank;              // Numeric rank (lower = better)
 ```
 
@@ -110,7 +110,7 @@ $explanation = $result->explanation;
 $explanation->candidatesConsidered;  // Total candidates evaluated
 $explanation->exclusionSummary;      // ['dnc' => 2, 'no_consent' => 1]
 $explanation->fallbackUsed;          // Whether scope hierarchy was climbed
-$explanation->fallbackPath;          // 'location:45 → org:12'
+$explanation->fallbackPath;          // 'party:0193... → party:0193...' or null
 ```
 
 ## Resolution Algorithm
@@ -205,7 +205,7 @@ This will only return contacts that:
 ### Skip Previously Tried Contacts
 
 ```php
-$alreadyTried = [123, 456]; // Contact point IDs that bounced
+$alreadyTried = $bounced->pluck('id')->all(); // Contact point UUIDs that bounced
 
 $result = $resolver->resolve(new ResolverRequest(
     targetParty: $party,

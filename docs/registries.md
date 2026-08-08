@@ -193,9 +193,12 @@ public function register(): void
 The `PurposeRegistry` supports parent-child relationships:
 
 ```php
-interface PurposeRegistry extends BaseRegistry
+interface PurposeRegistry
 {
-    public function parent(string $slug): ?RegistryItem;
+    public function exists(string $slug): bool;
+    public function get(string $slug): RegistryItem;
+    public function all(): Collection;
+    public function parent(string $slug): ?string;   // the parent slug, not an item
     public function children(string $slug): Collection;
 }
 ```
@@ -231,20 +234,13 @@ class DatabasePurposeRegistry implements PurposeRegistry
         return Purpose::all()->map(fn ($p) => new PurposeRegistryItem($p));
     }
 
-    public function forCategory(string $category): Collection
-    {
-        return Purpose::where('category', $category)
-            ->get()
-            ->map(fn ($p) => new PurposeRegistryItem($p));
-    }
-
-    public function parent(string $slug): ?RegistryItem
+    public function parent(string $slug): ?string
     {
         $purpose = Purpose::where('slug', $slug)->first();
         if (!$purpose?->parent_id) {
             return null;
         }
-        return new PurposeRegistryItem($purpose->parent);
+        return $purpose->parent->slug;
     }
 
     public function children(string $slug): Collection

@@ -24,8 +24,8 @@ Default channels (configurable via registries):
 | `email` | Email address | Lowercase, trimmed |
 | `phone` | Voice phone | E.164 format |
 | `sms` | SMS-capable number | E.164 format |
-| `whatsapp` | WhatsApp | E.164 format |
-| `signal` | Signal | E.164 format |
+| `whatsapp` | WhatsApp | Trimmed (no channel-specific normalizer) |
+| `signal` | Signal | Trimmed (no channel-specific normalizer) |
 | `facebook` | Facebook | As-is |
 | `instagram` | Instagram | As-is |
 | `linkedin` | LinkedIn | As-is |

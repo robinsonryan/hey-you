@@ -194,7 +194,7 @@ $result = $checker->isBlocked($contactPoint);
 $result = $checker->isBlocked($contactPoint, 'marketing');
 
 $result->blocked;   // bool - is contact blocked?
-$result->scope;     // 'party', 'channel', 'purpose', 'contact_point', or null
+$result->scope;     // 'contact_point', 'channel_purpose', 'purpose', 'channel', 'party', or null
 $result->reason;    // The reason string from the DNC rule
 $result->rule;      // The DoNotContact model (if blocked)
 ```
@@ -204,7 +204,7 @@ $result->rule;      // The DoNotContact model (if blocked)
 The `DoNotContact` model can determine its own scope:
 
 ```php
-$dnc = DoNotContact::find(1);
+$dnc = DoNotContact::find($id); // package keys are UUID7 strings
 $scope = $dnc->determineScope();
 // Returns: 'party', 'channel', 'purpose', 'channel_purpose', or 'contact_point'
 ```

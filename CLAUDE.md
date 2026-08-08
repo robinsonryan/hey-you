@@ -138,7 +138,7 @@ tests/
 │   ├── Models/  Checkers/  Normalizers/  Registries/  Resolver/  Support/  Events/
 │   └── Traits/
 └── Fixtures/
-    ├── Models/              # Test consumer models (User, Company, Location)
+    ├── Models/              # Test consumer models (User, Company, LegacyAccount, LegacyVendor)
     └── database/migrations/ # Their tables
 ```
 
@@ -240,7 +240,7 @@ PostgreSQL 18+ is a hard requirement because `uuidv7()` cannot be expressed else
 | FK in migration | `$table->uuid('col')` or `$table->foreignUuid('col')` | `$table->foreignId('col')` |
 | Model PK config | `use ConfiguresIdentifiers;` (`$incrementing = true; $keyType = 'string';`) | `use HasUuids;` or `$incrementing = false` |
 | UUID generation | Postgres `uuidv7()` at insert time | `Str::uuid7()` in model boot |
-| Pre-persist IDs | `Uuid7Generator::generate()` (rare, only when needed) | `HasUuids` trait |
+| Pre-persist IDs | `(new Uuid7Generator)->generate()` (rare, only when needed) | `HasUuids` trait |
 
 ## Architecture
 

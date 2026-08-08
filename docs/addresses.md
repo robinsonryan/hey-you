@@ -44,13 +44,15 @@ $party->addresses()->create([
 
 ## Address Purposes
 
-Default purposes (configurable via registry):
+`purpose` is a free string — the package never validates it against `PurposeRegistry`.
+These are the conventional values:
 
 - `billing` - Billing/invoice address
 - `shipping` - Shipping destination
 - `general` - General mailing address
 
-Add custom purposes in config:
+The `heyyou.purposes` config drives the *contact point* purpose registry used by the
+resolver; addresses share the vocabulary by convention only. To add to that registry:
 
 ```php
 // config/heyyou.php
@@ -66,9 +68,9 @@ Add custom purposes in config:
 ```php
 use RobinsonRyan\HeyYou\Models\Address;
 
-Address::VALIDATION_UNVERIFIED; // 'unverified' - Not validated
-Address::VALIDATION_VERIFIED;   // 'verified' - Confirmed valid
-Address::VALIDATION_INVALID;    // 'invalid' - Known invalid
+Address::STATUS_UNVERIFIED; // 'unverified' - Not validated
+Address::STATUS_VERIFIED;   // 'verified' - Confirmed valid
+Address::STATUS_INVALID;    // 'invalid' - Known invalid
 ```
 
 ## Querying Addresses
@@ -297,8 +299,8 @@ class ValidateAddressListener
 
         $event->address->update([
             'validation_status' => $result->valid
-                ? Address::VALIDATION_VERIFIED
-                : Address::VALIDATION_INVALID,
+                ? Address::STATUS_VERIFIED
+                : Address::STATUS_INVALID,
             'geocode' => $result->coordinates,
             'formatted_cached' => $result->formattedAddress,
         ]);
@@ -312,7 +314,7 @@ class ValidateAddressListener
 function findNearestAddress(float $lat, float $lng, string $purpose = null): ?Address
 {
     $query = Address::whereNotNull('geocode')
-        ->where('validation_status', Address::VALIDATION_VERIFIED)
+        ->where('validation_status', Address::STATUS_VERIFIED)
         ->current();
 
     if ($purpose) {
