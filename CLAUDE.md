@@ -40,7 +40,7 @@ Composer name: `robinsonryan/hey-you` — a **library**, not an application.
 needs PHP 8.4; on PHP 8.2/8.3 Composer resolves the older rungs)
 **Database:** PostgreSQL 18+ only — the schema uses native `uuidv7()` column defaults
 
-Laravel 11 was dropped in `[Unreleased]`: it was advertised for months and never once
+Laravel 11 was dropped in v0.2.0: it was advertised for months and never once
 resolved locally. `--prefer-lowest` takes PHPUnit 11.0.0, testbench 9 requires
 `phpunit/phpunit ^11.0.1`, so testbench floated to 10 and the floor run landed on
 Laravel 12 anyway. Don't re-add `^11.0` without a harness run that actually exercises
@@ -224,7 +224,7 @@ Postgres generates the ID.
 It is a plain final class, **not** a contract implementation. The
 `IdentifierGenerator` contract, `AutoIncrementGenerator`, the
 `heyyou.identifier_generator` config key and its service-provider binding were all
-retired in `[Unreleased]` — a knob that turned and did nothing. Migrations emit
+retired in v0.2.0 — a knob that turned and did nothing. Migrations emit
 hardcoded `uuidv7()` DDL and never consulted the contract, `columnDefinition()` had no
 caller anywhere, and the sole caller of `generate()` built the generator by hand. This
 is a deliberate deviation from `docs/spec.md` §2.2 and §11.1, recorded in
@@ -440,7 +440,7 @@ without a spec change):
 
 ## Events dispatched
 
-As of the `[Unreleased]` work, **no event class in this package lacks a dispatch site**,
+As of v0.2.0, **no event class in this package lacks a dispatch site**,
 and no config key is read by nothing — both verified mechanically. Keep it that way: a
 new event class without a dispatcher is a regression, not a placeholder.
 

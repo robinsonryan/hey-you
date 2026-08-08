@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-08
+
 Finishes three features that were scaffolded and never wired: config keys and
 documented APIs that pointed at machinery nothing connected. As of this work no event
 class in the package lacks a dispatch site, and no config key is read by nothing —
@@ -48,7 +50,25 @@ both verified mechanically.
   time; when logging is off, events still dispatch — signalling is never gated by the
   history switch.
 
+### Changed
+- **The whole quality gate now runs on commit.** `.githooks/pre-commit` (wired by
+  `.ddev/config.githooks.yaml` setting `core.hooksPath` on `ddev start`, so a fresh
+  clone is gated with no manual step) runs `composer quality` in full — `lint:check`,
+  `analyze`, `refactor:check` and the tests. Unlike the consuming applications nothing
+  is held back: the suite is ~28 s, not eight minutes. Path-aware, so a docs-only commit
+  skips it; verify-only, so it never rewrites your files; and it refuses any commit the
+  gate itself dirtied rather than shipping a stale artifact under green checks.
+  Development tooling only — no packaged code changes.
+
 ### Fixed
+- **The documented config-publish command has never worked.** `README.md` told readers
+  to run `--tag=hey-you-config`; the service provider registers the tag as
+  `heyyou-config`, so the published command exited 0 having copied no file. Corrected,
+  along with a sweep of `docs/` for other claims that would fail on contact with the
+  code — address status constants named `VALIDATION_*` (they are `STATUS_*`), a
+  `PurposeRegistry::parent()` return type, a `consent_ok` resolver flag that is never
+  set, a missing `channel_purpose` DNC scope, and E.164 normalization claimed for
+  `whatsapp` and `signal` (only `email`, `phone` and `sms` have normalizers).
 - **`has('party')` and `whereHas('party')` no longer throw for UUID7-keyed consumers.**
   v0.1.2 guarded `PartyMorphOne`'s column cast behind `getKeyType() !== 'string'`, on
   the reasoning that a UUID consumer's key was already a string and needed no help.
@@ -63,6 +83,13 @@ both verified mechanically.
   outer, correlated side of the `exists` subquery.
 
 ### Removed
+- **The orphan `config/hey-you.php` is deleted.** A scaffold leftover holding a single
+  placeholder `example_setting` key that nothing read — not the service provider, `src/`,
+  the tests, `composer.json` or any doc. The package's real config is `config/heyyou.php`,
+  merged and published under the `heyyou-config` tag; two plausible filenames sitting
+  side by side is almost certainly why the README documented the wrong publish tag.
+  Not breaking: the file was never merged into the config repository, never published,
+  and never resolvable as `config('hey-you.*')`.
 - **BREAKING: the `identifier_generator` contract is retired.** Gone:
   `RobinsonRyan\HeyYou\Contracts\IdentifierGenerator`,
   `RobinsonRyan\HeyYou\Support\AutoIncrementGenerator`, the
