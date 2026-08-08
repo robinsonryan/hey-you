@@ -7,23 +7,16 @@ namespace RobinsonRyan\HeyYou\Relations;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Query\Expression as QueryExpression;
 use RobinsonRyan\HeyYou\Models\Party;
+use RobinsonRyan\HeyYou\Relations\Concerns\CoercesConsumerKeyToText;
 
 /**
  * The consumer -> Party morph, with the consumer's key coerced to text.
  *
- * `heyyou_parties.partyable_id` is a varchar, because the package's own models
- * carry UUID7 keys. A consumer model on an auto-incrementing bigint key binds
- * its key as an integer, and PostgreSQL refuses `character varying = bigint`
- * outright — it has no implicit cast between the two, so every read through the
- * relation fails with SQLSTATE[42883] rather than silently coercing the way
- * SQLite did. This subclass closes that gap wherever the two sides meet: bound
- * values become strings, and the correlated column of an existence query is
- * wrapped in a cast.
- *
- * Consumers that follow the documented UUID7 convention already have a string
- * key, so nothing below changes their queries.
+ * `heyyou_parties.partyable_id` is a varchar; the consumer's key is whatever the
+ * consumer chose. CoercesConsumerKeyToText explains why PostgreSQL will not
+ * bridge the two on its own — this class just wires the concern's helpers into
+ * the three places a MorphOne touches the boundary.
  *
  * @template TDeclaringModel of Model
  *
@@ -31,35 +24,30 @@ use RobinsonRyan\HeyYou\Models\Party;
  */
 final class PartyMorphOne extends MorphOne
 {
+    use CoercesConsumerKeyToText;
+
     /**
      * The parent key as bound into `where partyable_id = ?`, into eager-load
      * dictionaries, and onto the foreign key of a party being created.
      */
     public function getParentKey(): ?string
     {
-        $key = parent::getParentKey();
-
-        return $key === null ? null : (string) $key;
+        return $this->stringifyConsumerKey(parent::getParentKey());
     }
 
     /**
      * Qualify the parent key for `has()` / `whereHas()`, where the comparison
      * happens column-to-column in SQL and no binding is involved.
+     *
+     * Laravel's PHPDoc narrows this to `string`, but every caller hands the
+     * result to the query grammar's `wrap()`, which accepts an Expression just
+     * as readily — that is how `DB::raw()` columns work at all.
+     *
+     * @phpstan-ignore method.childReturnType
      */
-    public function getQualifiedParentKeyName(): string|Expression
+    public function getQualifiedParentKeyName(): Expression
     {
-        $name = parent::getQualifiedParentKeyName();
-
-        if ($this->parent->getKeyType() === 'string') {
-            return $name;
-        }
-
-        $column = $this->parent->getConnection()->getQueryGrammar()->wrap($name);
-
-        // The wrapped value is the parent's own table and key name, never user
-        // input, so there is nothing here for a caller to inject through.
-        // @phpstan-ignore argument.type
-        return new QueryExpression('cast('.$column.' as varchar)');
+        return $this->consumerKeyAsText($this->parent, parent::getQualifiedParentKeyName());
     }
 
     /**
@@ -78,13 +66,10 @@ final class PartyMorphOne extends MorphOne
      *
      * @param  array<int, TDeclaringModel>  $models
      * @param  string|null  $key
-     * @return array<int, string|null>
+     * @return array<array-key, string|null>
      */
     protected function getKeys(array $models, $key = null): array
     {
-        return array_map(
-            static fn (mixed $value): ?string => $value === null ? null : (string) $value,
-            parent::getKeys($models, $key),
-        );
+        return $this->stringifyConsumerKeys(parent::getKeys($models, $key));
     }
 }

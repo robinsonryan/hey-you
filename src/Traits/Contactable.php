@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace RobinsonRyan\HeyYou\Traits;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use RobinsonRyan\HeyYou\Models\Address;
+use RobinsonRyan\HeyYou\Models\ContactPoint;
 use RobinsonRyan\HeyYou\Models\Party;
+use RobinsonRyan\HeyYou\Relations\PartyHasManyThrough;
 use RobinsonRyan\HeyYou\Relations\PartyMorphOne;
 
 /**
@@ -65,6 +70,63 @@ trait Contactable
             $table.'.partyable_type',
             $table.'.partyable_id',
             $this->getKeyName(),
+        );
+    }
+
+    /**
+     * The contact points of this consumer's party.
+     *
+     * A hop through `heyyou_parties` onto the party's own `contactPoints()`
+     * rows — not a second query path to contact points.
+     *
+     * @return HasManyThrough<ContactPoint, Party, $this>
+     */
+    public function contactPoints(): HasManyThrough
+    {
+        /** @var ContactPoint $contactPoint */
+        $contactPoint = $this->newRelatedInstance(ContactPoint::class);
+
+        return $this->throughParty($contactPoint->newQuery());
+    }
+
+    /**
+     * The addresses of this consumer's party.
+     *
+     * @return HasManyThrough<Address, Party, $this>
+     */
+    public function addresses(): HasManyThrough
+    {
+        /** @var Address $address */
+        $address = $this->newRelatedInstance(Address::class);
+
+        return $this->throughParty($address->newQuery());
+    }
+
+    /**
+     * Build a consumer -> Party -> related relation over the given query.
+     *
+     * A PartyHasManyThrough rather than a plain `hasManyThrough()`, so the
+     * consumer's morph type constrains the hop and its key survives the
+     * comparison against the varchar `partyable_id`.
+     *
+     * @template TRelatedModel of Model
+     *
+     * @param  Builder<TRelatedModel>  $query
+     * @return PartyHasManyThrough<TRelatedModel, $this>
+     */
+    private function throughParty(Builder $query): PartyHasManyThrough
+    {
+        /** @var Party $party */
+        $party = $this->newRelatedInstance(Party::class);
+
+        return new PartyHasManyThrough(
+            $query,
+            $this,
+            $party,
+            'partyable_id',
+            'party_id',
+            $this->getKeyName(),
+            $party->getKeyName(),
         );
     }
 
