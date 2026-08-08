@@ -17,17 +17,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Identifier Generator
-    |--------------------------------------------------------------------------
-    |
-    | The class responsible for generating primary keys for package models.
-    | Must implement \RobinsonRyan\HeyYou\Contracts\IdentifierGenerator.
-    |
-    */
-    'identifier_generator' => RobinsonRyan\HeyYou\Support\Uuid7Generator::class,
-
-    /*
-    |--------------------------------------------------------------------------
     | Registries
     |--------------------------------------------------------------------------
     |

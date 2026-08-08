@@ -13,7 +13,6 @@ use RobinsonRyan\HeyYou\Contracts\ContactPointPurposeManager;
 use RobinsonRyan\HeyYou\Contracts\ContactResolver;
 use RobinsonRyan\HeyYou\Contracts\DncChecker;
 use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
-use RobinsonRyan\HeyYou\Contracts\IdentifierGenerator;
 use RobinsonRyan\HeyYou\Contracts\Registries\ChannelRegistry;
 use RobinsonRyan\HeyYou\Contracts\Registries\ConsentCategoryRegistry;
 use RobinsonRyan\HeyYou\Contracts\Registries\NormalizerRegistry;
@@ -33,7 +32,6 @@ final class HeyYouServiceProvider extends ServiceProvider
             'heyyou',
         );
 
-        $this->registerIdentifierGenerator();
         $this->registerRegistries();
         $this->registerEventDispatcher();
         $this->registerCoreServices();
@@ -44,14 +42,6 @@ final class HeyYouServiceProvider extends ServiceProvider
         $this->publishConfig();
         $this->loadMigrations();
         $this->publishMigrations();
-    }
-
-    protected function registerIdentifierGenerator(): void
-    {
-        $this->app->bind(
-            IdentifierGenerator::class,
-            config('heyyou.identifier_generator'),
-        );
     }
 
     protected function registerRegistries(): void

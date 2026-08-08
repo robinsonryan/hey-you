@@ -10,7 +10,6 @@ use RobinsonRyan\HeyYou\Contracts\ContactPointPurposeManager;
 use RobinsonRyan\HeyYou\Contracts\ContactResolver;
 use RobinsonRyan\HeyYou\Contracts\DncChecker;
 use RobinsonRyan\HeyYou\Contracts\EventDispatcher;
-use RobinsonRyan\HeyYou\Contracts\IdentifierGenerator;
 use RobinsonRyan\HeyYou\Contracts\Registries\ChannelRegistry;
 use RobinsonRyan\HeyYou\Contracts\Registries\ConsentCategoryRegistry;
 use RobinsonRyan\HeyYou\Contracts\Registries\NormalizerRegistry;
@@ -27,13 +26,8 @@ use RobinsonRyan\HeyYou\Registries\ConfigRoleRegistry;
 use RobinsonRyan\HeyYou\Registries\DefaultNormalizerRegistry;
 use RobinsonRyan\HeyYou\Resolver\DefaultContactResolver;
 use RobinsonRyan\HeyYou\Support\DefaultContactPointPurposeManager;
-use RobinsonRyan\HeyYou\Support\Uuid7Generator;
 
 describe('Service Provider bindings', function (): void {
-    it('binds IdentifierGenerator', function (): void {
-        expect(app(IdentifierGenerator::class))->toBeInstanceOf(Uuid7Generator::class);
-    });
-
     it('binds ChannelRegistry', function (): void {
         expect(app(ChannelRegistry::class))->toBeInstanceOf(ConfigChannelRegistry::class);
     });
