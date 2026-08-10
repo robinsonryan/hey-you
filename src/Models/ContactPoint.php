@@ -108,6 +108,22 @@ final class ContactPoint extends Model
     ];
 
     /**
+     * The contact value never rides along in a serialized model. A consumer
+     * that embeds a ContactPoint in an API response or Inertia payload —
+     * `$party->contactPoints()->get()` straight into JSON — would otherwise
+     * ship every address and phone number it holds, silently, the day someone
+     * writes that line. Reading the value stays trivial (`$point->value_raw`);
+     * serializing it now takes an explicit `makeVisible()`, which is the
+     * difference between a decision and an accident.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'value_raw',
+        'value_normalized',
+    ];
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

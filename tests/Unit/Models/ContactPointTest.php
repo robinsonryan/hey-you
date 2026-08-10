@@ -215,3 +215,21 @@ it('has verificationEvents relationship', function (): void {
     expect($contactPoint->verificationEvents)->toHaveCount(1);
     expect($contactPoint->verificationEvents->first()->method)->toBe('code');
 });
+
+it('never serializes the contact value', function (): void {
+    // A consumer embedding a ContactPoint in an API response or page payload
+    // must not ship the address or number by accident. Reading the attribute
+    // stays trivial; putting it on the wire takes an explicit makeVisible().
+    $contactPoint = ContactPoint::create([
+        'party_id' => $this->party->id,
+        'channel' => 'email',
+        'value_raw' => 'Secret.Address@Example.com',
+    ]);
+
+    $serialized = $contactPoint->fresh()->toArray();
+
+    expect($serialized)->not->toHaveKeys(['value_raw', 'value_normalized'])
+        ->and(json_encode($serialized))->not->toContain('secret.address')
+        ->and($contactPoint->fresh()->value_raw)->toBe('Secret.Address@Example.com')
+        ->and($contactPoint->fresh()->makeVisible('value_raw')->toArray())->toHaveKey('value_raw');
+});
