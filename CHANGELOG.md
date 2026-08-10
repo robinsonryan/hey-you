@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-10
+
+### Fixed
+- **`ContactPoint` hides `value_raw`/`value_normalized` from serialization.**
+  A consumer embedding a contact point in an API response or page payload would
+  have shipped every address and number it holds the day someone wrote that
+  line. Reading the attribute is unchanged; putting it on the wire now takes an
+  explicit `makeVisible()`. Found by ccstake's identity-build review (its R24
+  "the UI never displays a contact value" architecture probe). *(Note: the
+  `v0.2.1` tag points at the fix commit; this entry landed immediately after.)*
+
 ## [0.2.0] - 2026-08-08
 
 Finishes three features that were scaffolded and never wired: config keys and
