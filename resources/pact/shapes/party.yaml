@@ -1,0 +1,44 @@
+format: pact/1
+shape: party
+model: RobinsonRyan\HeyYou\Models\Party
+key: uuid7
+timestamps: true
+soft_deletes: true
+
+label: Party
+label_plural: Parties
+
+# The package ships this shape so an application that has Pact installed gets
+# the party contract — validation, resource output, TypeScript — without
+# restating it. Applications extend it (`extends: hey-you::party`) rather than
+# editing it.
+
+fields:
+  partyable_type:
+    type: text
+    label: Record type
+    help: The kind of application record this party stands for.
+    rules: [max: 255]
+  partyable_id:
+    type: text
+    label: Record
+    help: The key of the application record this party stands for.
+    rules: [max: 255]
+  display_name_cached:
+    type: text
+    label: Display name
+    help: Kept in step with the record this party stands for.
+    rules: [max: 255]
+  metadata:
+    type: json
+    nullable: true
+    label: Metadata
+    contexts:
+      list: { hidden: true }
+
+query:
+  filters: [partyable_type, display_name_cached]
+  sorts: [display_name_cached, created_at]
+  default_sort: display_name_cached
+  fields: true
+  per_page: { default: 25, max: 100 }

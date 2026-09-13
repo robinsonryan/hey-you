@@ -42,6 +42,7 @@ final class HeyYouServiceProvider extends ServiceProvider
         $this->publishConfig();
         $this->loadMigrations();
         $this->publishMigrations();
+        $this->registerShapes();
     }
 
     protected function registerRegistries(): void
@@ -90,6 +91,26 @@ final class HeyYouServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'heyyou-migrations');
+    }
+
+    /**
+     * Hand the party shape to Pact when the application has Pact installed.
+     *
+     * Guarded rather than required: hey-you works perfectly well without Pact,
+     * and an application that has both should not have to restate the party
+     * contract to get validation, resource output and TypeScript from it.
+     */
+    protected function registerShapes(): void
+    {
+        if (! class_exists(\RobinsonRyan\Pact\Pact::class)) {
+            return;
+        }
+
+        // The package's pact root, not its `shapes/` directory: Pact reads
+        // `shapes/`, `vocabularies/` and `groups/` beneath the path it is
+        // given (spec §5.1), so a path one level down could never carry a
+        // vocabulary.
+        \RobinsonRyan\Pact\Facades\Pact::shapesFrom(__DIR__.'/../resources/pact', 'hey-you');
     }
 
     private function migrationsPublished(): bool
