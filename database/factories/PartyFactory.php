@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace RobinsonRyan\HeyYou\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 use RobinsonRyan\HeyYou\Models\Party;
-use RobinsonRyan\HeyYou\Support\Uuid7Generator;
 
 /**
  * @extends Factory<Party>
@@ -24,7 +24,9 @@ final class PartyFactory extends Factory
             'partyable_type' => 'App\\Models\\User',
             // Consumer models carry UUID7 keys, so a stand-in partyable_id must be
             // a UUID — an integer is not a valid value for a consumer key column.
-            'partyable_id' => (new Uuid7Generator)->generate(),
+            // This is a foreign reference to a row that does not exist, not a
+            // primary key: the package never mints its own keys in PHP.
+            'partyable_id' => Str::uuid7()->toString(),
             'display_name_cached' => $this->faker->name(),
             'metadata' => null,
         ];
