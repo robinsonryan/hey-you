@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use RobinsonRyan\HeyYou\Support\Uuid7Generator;
+use Illuminate\Support\Str;
 use RobinsonRyan\HeyYou\Tests\TestCase;
 
 uses(TestCase::class)->in('Feature', 'Unit');
@@ -14,5 +14,5 @@ uses(TestCase::class)->in('Feature', 'Unit');
  */
 function fakePartyableId(): string
 {
-    return (new Uuid7Generator)->generate();
+    return Str::uuid7()->toString();
 }

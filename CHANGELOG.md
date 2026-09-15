@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-09-15
+
+### Removed
+- **`RobinsonRyan\HeyYou\Support\Uuid7Generator` — BREAKING if you constructed it.** It was
+  the last remnant of the retired `identifier_generator` contract: a one-method class that
+  returned `Str::uuid7()`, with no caller left in the package or in any first-party consumer.
+  Keeping a PHP-side key generator around in a package whose doctrine is that the database
+  generates every key was an invitation to use it. Call `Str::uuid7()` directly in the one
+  place it is legitimate — a test fixture that needs a stand-in foreign reference — which is
+  what `PartyFactory` now does. Consumers should also delete the stale `identifier_generator`
+  entry (and its `use` import) from a published `config/heyyou.php`; it has been ignored
+  since 0.2.0
+
 ## [0.2.1] - 2026-08-10
 
 ### Fixed
